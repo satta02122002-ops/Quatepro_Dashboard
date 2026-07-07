@@ -1,0 +1,1876 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuotePro Suite — ISS Global Forwarding</title>
+<style>
+/* ================= THEMES ================= */
+:root, :root[data-theme="dark"]{
+  --bg:#06090f; --card:#0d1117; --card2:#111826; --border:#1e2633; --border2:#2a3548;
+  --text:#e6edf3; --muted:#8b98a9; --faint:#5b6878;
+  --accent:#3987e5; --accent2:#2aa8c4; --accent-soft:rgba(57,135,229,.14);
+  --ok:#0fa571; --ok-soft:rgba(15,165,113,.14);
+  --warn:#c98500; --warn-soft:rgba(201,133,0,.16);
+  --bad:#e66767; --bad-soft:rgba(230,103,103,.14);
+  --grid:#1c2432; --tick:#8b98a9;
+  --s1:#3987e5; --s2:#199e70; --s3:#c98500; --s4:#9085e9; --s5:#e66767; --s6:#d55181; --s7:#d95926; --s8:#008300;
+  --shadow:0 8px 28px rgba(0,0,0,.45);
+  --input-bg:#0a0f18;
+}
+:root[data-theme="light"]{
+  --bg:#f2f4f8; --card:#ffffff; --card2:#f8fafc; --border:#dfe5ee; --border2:#c9d3e0;
+  --text:#101828; --muted:#5c6a7f; --faint:#8b98a9;
+  --accent:#2a78d6; --accent2:#0e7490; --accent-soft:rgba(42,120,214,.10);
+  --ok:#0a8a55; --ok-soft:rgba(10,138,85,.10);
+  --warn:#b45309; --warn-soft:rgba(180,83,9,.12);
+  --bad:#d03b3b; --bad-soft:rgba(208,59,59,.10);
+  --grid:#e7ebf2; --tick:#5c6a7f;
+  --s1:#2a78d6; --s2:#1baf7a; --s3:#eda100; --s4:#4a3aa7; --s5:#e34948; --s6:#e87ba4; --s7:#eb6834; --s8:#008300;
+  --shadow:0 6px 20px rgba(16,24,40,.08);
+  --input-bg:#ffffff;
+}
+:root[data-theme="blue"]{
+  --bg:#050d1f; --card:#0b1730; --card2:#101f3d; --border:#1c2c4f; --border2:#2a3d66;
+  --text:#e4ecfb; --muted:#8fa3c8; --faint:#5f7398;
+  --accent:#3987e5; --accent2:#2aa8c4; --accent-soft:rgba(57,135,229,.16);
+  --ok:#0fa571; --ok-soft:rgba(15,165,113,.14);
+  --warn:#c98500; --warn-soft:rgba(201,133,0,.16);
+  --bad:#e66767; --bad-soft:rgba(230,103,103,.14);
+  --grid:#182848; --tick:#8fa3c8;
+  --s1:#3987e5; --s2:#199e70; --s3:#c98500; --s4:#9085e9; --s5:#e66767; --s6:#d55181; --s7:#d95926; --s8:#008300;
+  --shadow:0 8px 28px rgba(2,8,26,.55);
+  --input-bg:#081128;
+}
+:root[data-theme="green"]{
+  --bg:#04100b; --card:#0a1a12; --card2:#0e2318; --border:#1a3326; --border2:#264734;
+  --text:#e2f2e9; --muted:#8fb3a1; --faint:#5f8570;
+  --accent:#199e70; --accent2:#2aa8c4; --accent-soft:rgba(25,158,112,.16);
+  --ok:#0fa571; --ok-soft:rgba(15,165,113,.14);
+  --warn:#c98500; --warn-soft:rgba(201,133,0,.16);
+  --bad:#e66767; --bad-soft:rgba(230,103,103,.14);
+  --grid:#14291e; --tick:#8fb3a1;
+  --s1:#199e70; --s2:#3987e5; --s3:#c98500; --s4:#9085e9; --s5:#e66767; --s6:#d55181; --s7:#d95926; --s8:#008300;
+  --shadow:0 8px 28px rgba(0,10,5,.55);
+  --input-bg:#07160f;
+}
+/* ================= BASE ================= */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background:var(--bg); color:var(--text); font-size:14px; line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;cursor:pointer}
+input,select{font-family:inherit;font-size:13px;color:var(--text);background:var(--input-bg);
+  border:1px solid var(--border);border-radius:8px;padding:7px 10px;outline:none;}
+input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+select option{background:var(--card);color:var(--text)}
+::placeholder{color:var(--faint)}
+.hidden{display:none!important}
+.screen{min-height:100vh;display:flex;flex-direction:column}
+a{color:var(--accent)}
+h1,h2,h3{font-weight:650;letter-spacing:-.01em}
+/* ================= BUTTONS ================= */
+.btn{display:inline-flex;align-items:center;gap:7px;border-radius:8px;border:1px solid var(--border);
+  background:var(--card2);color:var(--text);padding:8px 14px;font-size:13px;font-weight:550;
+  transition:background .15s,border-color .15s;white-space:nowrap}
+.btn:hover{border-color:var(--border2);background:var(--card)}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-primary:hover{filter:brightness(1.1);background:var(--accent);border-color:var(--accent)}
+.btn-ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.btn-ok:hover{filter:brightness(1.1);background:var(--ok)}
+.btn-danger{background:transparent;border-color:var(--bad);color:var(--bad)}
+.btn-danger:hover{background:var(--bad-soft)}
+.btn-ghost{background:transparent}
+.btn-sm{padding:5px 10px;font-size:12px;border-radius:7px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+/* ================= TOP BAR ================= */
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 20px;background:var(--card);
+  border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;font-weight:750;font-size:16px;letter-spacing:-.02em}
+.logo-mark{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800}
+.badge{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  padding:3px 8px;border-radius:20px;background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent)}
+.topbar .spacer{flex:1}
+.top-user{font-size:12px;color:var(--muted)}
+.top-user b{color:var(--text)}
+/* ================= LOGIN ================= */
+.login-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:24px;
+  background:radial-gradient(1000px 500px at 70% -10%,var(--accent-soft),transparent 60%),var(--bg)}
+.login-box{width:100%;max-width:400px;background:var(--card);border:1px solid var(--border);
+  border-radius:16px;padding:34px 32px;box-shadow:var(--shadow)}
+.login-box .logo{justify-content:center;margin-bottom:6px;font-size:20px}
+.login-sub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:26px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px}
+.field input,.field select{width:100%;padding:10px 12px;font-size:14px}
+.login-err{color:var(--bad);font-size:12.5px;min-height:18px;margin:4px 0 8px;text-align:center}
+.login-hint{margin-top:18px;padding-top:14px;border-top:1px solid var(--border);
+  font-size:11.5px;color:var(--faint);text-align:center;line-height:1.7}
+/* ================= MODULE SELECTOR ================= */
+.mods-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;gap:26px}
+.mods-title{text-align:center}
+.mods-title h1{font-size:26px;margin-bottom:6px}
+.mods-title p{color:var(--muted)}
+.mods-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,380px));gap:22px;justify-content:center;width:100%;max-width:860px}
+.mod-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;
+  display:flex;flex-direction:column;gap:14px;box-shadow:var(--shadow);transition:transform .15s,border-color .15s}
+.mod-card:hover{transform:translateY(-3px);border-color:var(--accent)}
+.mod-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px}
+.mod-card h2{font-size:19px}
+.mod-card p{color:var(--muted);font-size:13px;flex:1}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:11px;padding:3px 9px;border-radius:20px;background:var(--card2);border:1px solid var(--border);color:var(--muted)}
+/* ================= UPLOAD ================= */
+.upload-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;gap:20px}
+.upload-head{text-align:center}
+.upload-head h1{font-size:23px;margin-bottom:4px}
+.upload-head p{color:var(--muted)}
+.drop-zone{width:100%;max-width:620px;border:2px dashed var(--border2);border-radius:16px;
+  background:var(--card);padding:56px 32px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s}
+.drop-zone:hover,.drop-zone.drag{border-color:var(--accent);background:var(--accent-soft)}
+.drop-zone .dz-icon{font-size:40px;margin-bottom:12px}
+.drop-zone h3{font-size:16px;margin-bottom:6px}
+.drop-zone p{color:var(--muted);font-size:13px}
+.drop-zone .formats{margin-top:14px;font-size:11.5px;color:var(--faint)}
+/* ================= CLEAN SCREEN ================= */
+.clean-wrap{flex:1;padding:26px;max-width:1180px;margin:0 auto;width:100%;display:flex;flex-direction:column;gap:18px}
+.dq-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
+.dq-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.dq-card .v{font-size:24px;font-weight:750;letter-spacing:-.02em}
+.dq-card .l{font-size:11.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.dq-card.warn .v{color:var(--warn)} .dq-card.bad .v{color:var(--bad)} .dq-card.ok .v{color:var(--ok)}
+.clean-tools{display:flex;gap:10px;flex-wrap:wrap}
+.clean-actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+/* ================= CARDS / PANELS ================= */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:var(--shadow)}
+.card h3{font-size:13.5px;font-weight:650;margin-bottom:12px;color:var(--text)}
+.card h3 .sub{font-weight:450;color:var(--muted);font-size:12px;margin-left:6px}
+/* ================= KPI ================= */
+.kpi-grid{display:grid;gap:14px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:15px 17px;min-width:0}
+.kpi .l{font-size:11px;color:var(--muted);font-weight:650;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.kpi .v{font-size:23px;font-weight:750;letter-spacing:-.02em;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi .s{font-size:11.5px;color:var(--muted);margin-top:4px}
+.kpi .s b{font-weight:650}
+.kpi.k-ok .v{color:var(--ok)} .kpi.k-warn .v{color:var(--warn)} .kpi.k-bad .v{color:var(--bad)} .kpi.k-acc .v{color:var(--accent)}
+/* ================= FILTER BAR ================= */
+.filterbar{background:var(--card);border-bottom:1px solid var(--border);padding:10px 20px;
+  display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;position:relative;z-index:40}
+.f-item{display:flex;flex-direction:column;gap:3px}
+.f-item label{font-size:10px;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:.05em}
+.f-item select,.f-item input{min-width:100px;max-width:150px;padding:5.5px 8px;font-size:12px}
+.f-item input.f-num{width:92px;min-width:92px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:8px 20px 0;background:var(--card)}
+.chips:empty{display:none}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;padding:3px 9px;border-radius:20px;
+  background:var(--accent-soft);border:1px solid var(--accent);color:var(--accent);font-weight:550}
+.chip button{background:none;border:none;color:inherit;font-size:13px;line-height:1;padding:0}
+.result-count{font-size:12px;color:var(--muted);margin-left:auto;align-self:center;white-space:nowrap}
+/* ================= TABS ================= */
+.tabbar{display:flex;gap:2px;padding:0 20px;background:var(--card);border-bottom:1px solid var(--border);overflow-x:auto}
+.tabbar button{background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);
+  padding:11px 16px;font-size:13px;font-weight:600;white-space:nowrap}
+.tabbar button:hover{color:var(--text)}
+.tabbar button.active{color:var(--accent);border-bottom-color:var(--accent)}
+/* ================= DASH CONTENT ================= */
+.dash-content{flex:1;padding:20px;display:flex;flex-direction:column;gap:16px;max-width:1500px;margin:0 auto;width:100%}
+.charts-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;min-width:0}
+.chart-card h3{font-size:13px;font-weight:650;margin-bottom:4px}
+.chart-card .csub{font-size:11.5px;color:var(--muted);margin-bottom:10px}
+.chart-box{position:relative;height:270px}
+.chart-box.tall{height:300px}
+.chart-box.short{height:220px}
+.span-12{grid-column:span 12}.span-8{grid-column:span 8}.span-7{grid-column:span 7}
+.span-6{grid-column:span 6}.span-5{grid-column:span 5}.span-4{grid-column:span 4}
+@media(max-width:1100px){.span-8,.span-7,.span-6,.span-5,.span-4{grid-column:span 12}}
+/* ================= TABLES ================= */
+.table-tools{display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.table-tools input[type=search]{min-width:220px;flex:0 1 300px}
+.table-tools .tt-count{font-size:12px;color:var(--muted);margin-left:auto}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px}
+table.tbl{width:100%;border-collapse:collapse;font-size:12.5px;min-width:640px}
+table.tbl th{position:sticky;top:0;background:var(--card2);color:var(--muted);font-size:11px;
+  text-transform:uppercase;letter-spacing:.05em;font-weight:700;text-align:left;padding:9px 12px;
+  border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
+table.tbl th.no-sort{cursor:default}
+table.tbl th .arr{color:var(--accent);font-size:10px}
+table.tbl td{padding:8px 12px;border-bottom:1px solid var(--grid);white-space:nowrap;max-width:340px;overflow:hidden;text-overflow:ellipsis}
+table.tbl tr:last-child td{border-bottom:none}
+table.tbl tbody tr:hover{background:var(--card2)}
+table.tbl td.num{text-align:right;font-variant-numeric:tabular-nums}
+table.tbl th.num{text-align:right}
+.pill{display:inline-block;font-size:11px;font-weight:650;padding:2px 9px;border-radius:20px}
+.pill-ok{background:var(--ok-soft);color:var(--ok)}
+.pill-warn{background:var(--warn-soft);color:var(--warn)}
+.pill-bad{background:var(--bad-soft);color:var(--bad)}
+.pill-mut{background:var(--card2);color:var(--muted);border:1px solid var(--border)}
+.pager{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:12px;font-size:12.5px;color:var(--muted)}
+/* ================= INSIGHTS ================= */
+.insight-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.insight{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:10px;padding:14px 16px}
+.insight .t{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.insight .v{font-size:16px;font-weight:700}
+.insight .d{font-size:12px;color:var(--muted);margin-top:3px}
+.insight.i-ok{border-left-color:var(--ok)} .insight.i-warn{border-left-color:var(--warn)} .insight.i-bad{border-left-color:var(--bad)}
+/* ================= MODALS ================= */
+.modal-bg{position:fixed;inset:0;background:rgba(2,6,12,.72);z-index:100;display:flex;
+  align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)}
+.modal{background:var(--card);border:1px solid var(--border2);border-radius:14px;width:100%;
+  max-width:520px;max-height:88vh;display:flex;flex-direction:column;box-shadow:var(--shadow)}
+.modal.wide{max-width:720px}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+.modal-head h3{font-size:15px}
+.modal-head .x{background:none;border:none;color:var(--muted);font-size:20px;line-height:1}
+.modal-body{padding:18px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+.modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--border)}
+.export-opt{display:flex;gap:13px;align-items:center;padding:13px 15px;border:1px solid var(--border);
+  border-radius:10px;cursor:pointer;transition:border-color .15s,background .15s;background:var(--card2)}
+.export-opt:hover{border-color:var(--accent);background:var(--accent-soft)}
+.export-opt .ic{font-size:21px}
+.export-opt .t{font-weight:650;font-size:13.5px}
+.export-opt .d{font-size:12px;color:var(--muted)}
+/* ================= USERS TABLE ================= */
+.u-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:9px;background:var(--card2)}
+.u-row .un{font-weight:650}
+.u-row .ur{font-size:11px;color:var(--muted)}
+.u-row .sp{flex:1}
+.totp-secret{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;background:var(--input-bg);
+  border:1px dashed var(--border2);border-radius:8px;padding:9px 12px;word-break:break-all;user-select:all}
+/* ================= MISC ================= */
+.smart-group{border:1px solid var(--border);border-radius:9px;padding:11px 13px;background:var(--card2)}
+.smart-group .canon{font-weight:650;color:var(--ok)}
+.smart-group .vars{font-size:12px;color:var(--muted);margin-top:3px}
+.overlay{position:fixed;inset:0;background:rgba(2,6,12,.82);z-index:200;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:16px;backdrop-filter:blur(4px)}
+.spinner{width:42px;height:42px;border-radius:50%;border:3px solid var(--border2);border-top-color:var(--accent);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.overlay .msg{font-size:14px;color:var(--muted);font-weight:550}
+.toast-wrap{position:fixed;bottom:22px;right:22px;z-index:300;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--card);border:1px solid var(--border2);border-left:3px solid var(--accent);
+  border-radius:10px;padding:11px 16px;font-size:13px;box-shadow:var(--shadow);animation:slidein .25s ease}
+.toast.ok{border-left-color:var(--ok)} .toast.bad{border-left-color:var(--bad)}
+@keyframes slidein{from{transform:translateX(30px);opacity:0}to{transform:none;opacity:1}}
+.footer{padding:16px 20px;text-align:center;font-size:12px;color:var(--faint);border-top:1px solid var(--border);margin-top:auto}
+.theme-sel{min-width:0!important;width:auto;padding:6px 26px 6px 9px;font-size:12px}
+@media(max-width:760px){
+  .topbar{padding:10px 12px}
+  .dash-content{padding:12px}
+  .filterbar{padding:10px 12px}
+  .f-item select,.f-item input{min-width:86px}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div id="screen-login" class="screen">
+  <div class="login-wrap">
+    <div class="login-box">
+      <div class="logo"><div class="logo-mark">Q</div>QuotePro Suite</div>
+      <div class="login-sub">ISS Global Forwarding · Contract Logistics</div>
+      <form id="login-form" autocomplete="off">
+        <div class="field"><label>Username</label><input id="li-user" type="text" placeholder="Enter username" required></div>
+        <div class="field"><label>Password</label><input id="li-pass" type="password" placeholder="Enter password" required></div>
+        <div class="login-err" id="li-err"></div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;padding:11px" type="submit">Sign In</button>
+      </form>
+      <form id="totp-form" class="hidden" autocomplete="off">
+        <div class="field"><label>Two-Factor Code</label>
+          <input id="li-totp" type="text" inputmode="numeric" maxlength="6" placeholder="6-digit code from authenticator" style="text-align:center;letter-spacing:.35em;font-size:18px">
+        </div>
+        <div class="login-err" id="totp-err"></div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;padding:11px" type="submit">Verify Code</button>
+        <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:8px" type="button" id="totp-back">Back to login</button>
+      </form>
+      <div class="login-hint">Secure browser-local sign in · Sessions never leave this device</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODULE SELECTOR ============ -->
+<div id="screen-modules" class="screen hidden">
+  <div class="topbar">
+    <div class="logo"><div class="logo-mark">Q</div>QuotePro Suite</div>
+    <span class="badge">Module Selector</span>
+    <div class="spacer"></div>
+    <span class="top-user">Signed in as <b id="ms-user"></b></span>
+    <select class="theme-sel" data-themesel title="Theme">
+      <option value="dark">🌘 Dark</option><option value="light">☀️ Light</option>
+      <option value="blue">🔵 Blue</option><option value="green">🟢 Green</option>
+    </select>
+    <button class="btn btn-sm" id="ms-users-btn" title="User Management">👥 Users</button>
+    <button class="btn btn-sm btn-danger" data-logout>Logout</button>
+  </div>
+  <div class="mods-wrap">
+    <div class="mods-title">
+      <h1>Choose your workspace</h1>
+      <p>Select a module to upload data and explore analytics</p>
+    </div>
+    <div class="mods-grid">
+      <div class="mod-card">
+        <div class="mod-icon" style="background:var(--accent-soft);color:var(--accent)">📊</div>
+        <h2>QuotePro Dashboard</h2>
+        <p>Quotation analytics — revenue, customers, regions, brands, conversion</p>
+        <div class="tags"><span class="tag">Quotations</span><span class="tag">Revenue</span><span class="tag">Customers</span><span class="tag">Conversion</span></div>
+        <button class="btn btn-primary" style="justify-content:center" onclick="openModule('quotation')">Launch Quotation Dashboard</button>
+      </div>
+      <div class="mod-card">
+        <div class="mod-icon" style="background:var(--ok-soft);color:var(--ok)">🛠️</div>
+        <h2>PMC Dashboard</h2>
+        <p>PMC contract analytics — trucks, expiry, customer mix, contract value</p>
+        <div class="tags"><span class="tag">PMC Contracts</span><span class="tag">Trucks</span><span class="tag">Active/Expired</span><span class="tag">Approvals</span></div>
+        <button class="btn btn-ok" style="justify-content:center" onclick="openModule('pmc')">Launch PMC Dashboard</button>
+      </div>
+    </div>
+  </div>
+  <div class="footer">QuotePro — Intelligence Dashboard</div>
+</div>
+
+<!-- ============ UPLOAD ============ -->
+<div id="screen-upload" class="screen hidden">
+  <div class="topbar">
+    <div class="logo"><div class="logo-mark">Q</div><span id="up-title">QuotePro</span></div>
+    <span class="badge" id="up-badge">Upload</span>
+    <div class="spacer"></div>
+    <select class="theme-sel" data-themesel title="Theme">
+      <option value="dark">🌘 Dark</option><option value="light">☀️ Light</option>
+      <option value="blue">🔵 Blue</option><option value="green">🟢 Green</option>
+    </select>
+    <button class="btn btn-sm" onclick="showScreen('screen-modules')">⬅ Modules</button>
+    <button class="btn btn-sm btn-danger" data-logout>Logout</button>
+  </div>
+  <div class="upload-wrap">
+    <div class="upload-head">
+      <h1 id="up-head">Upload Quotation Data</h1>
+      <p id="up-sub">Drop your Excel export below to begin analysis</p>
+    </div>
+    <div class="drop-zone" id="drop-zone">
+      <div class="dz-icon">📂</div>
+      <h3>Drag &amp; drop your Excel file here</h3>
+      <p>or <a href="javascript:void 0">browse files</a> from your computer</p>
+      <div class="formats">Supported formats: .xlsx · .xls · .csv</div>
+    </div>
+    <input type="file" id="file-input" accept=".xlsx,.xls,.csv" class="hidden">
+  </div>
+  <div class="footer">QuotePro — Intelligence Dashboard</div>
+</div>
+
+<!-- ============ TRIM & CLEAN ============ -->
+<div id="screen-clean" class="screen hidden">
+  <div class="topbar">
+    <div class="logo"><div class="logo-mark">Q</div><span id="cl-title">QuotePro</span></div>
+    <span class="badge">Trim &amp; Clean</span>
+    <div class="spacer"></div>
+    <span class="top-user" id="cl-file"></span>
+    <select class="theme-sel" data-themesel title="Theme">
+      <option value="dark">🌘 Dark</option><option value="light">☀️ Light</option>
+      <option value="blue">🔵 Blue</option><option value="green">🟢 Green</option>
+    </select>
+    <button class="btn btn-sm btn-danger" data-logout>Logout</button>
+  </div>
+  <div class="clean-wrap">
+    <div>
+      <h2 style="font-size:19px">Data Quality Check</h2>
+      <p style="color:var(--muted);font-size:13px">Review issues detected in your file. Cleaning is optional — you can skip straight to the dashboard.</p>
+    </div>
+    <div class="dq-grid" id="dq-grid"></div>
+    <div class="card">
+      <h3>Cleaning Tools</h3>
+      <div class="clean-tools">
+        <button class="btn" id="btn-autoclean">🧹 Data Trim &amp; Clean <span style="color:var(--muted);font-weight:450">(auto fix)</span></button>
+        <button class="btn" onclick="openReplaceModal()">🔁 Replace Values</button>
+        <button class="btn" onclick="openSmartModal()">✨ Smart Replace Similar Names</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Data Preview <span class="sub" id="prev-info"></span></h3>
+      <div class="tbl-wrap" style="max-height:340px;overflow:auto"><table class="tbl" id="prev-table"></table></div>
+    </div>
+    <div class="clean-actions">
+      <button class="btn" id="btn-skip">Skip →</button>
+      <button class="btn btn-primary" id="btn-proceed">Proceed to Dashboard →</button>
+    </div>
+  </div>
+  <div class="footer">QuotePro — Intelligence Dashboard</div>
+</div>
+
+<!-- ============ DASHBOARD ============ -->
+<div id="screen-dash" class="screen hidden">
+  <div class="topbar">
+    <div class="logo"><div class="logo-mark">Q</div><span id="d-title">QuotePro</span></div>
+    <span class="badge" id="d-badge">Dashboard</span>
+    <div class="spacer"></div>
+    <select class="theme-sel" data-themesel title="Theme">
+      <option value="dark">🌘 Dark</option><option value="light">☀️ Light</option>
+      <option value="blue">🔵 Blue</option><option value="green">🟢 Green</option>
+    </select>
+    <button class="btn btn-sm btn-primary" id="btn-export">⬇ Export</button>
+    <button class="btn btn-sm" onclick="openReplaceModal()">🔁 Replace</button>
+    <button class="btn btn-sm" id="btn-newupload">📂 New Upload</button>
+    <button class="btn btn-sm" onclick="showScreen('screen-modules')">🔀 Switch Module</button>
+    <button class="btn btn-sm btn-danger" data-logout>Logout</button>
+  </div>
+  <div class="filterbar" id="filterbar"></div>
+  <div class="chips" id="chips"></div>
+  <div class="tabbar" id="tabbar"></div>
+  <div class="dash-content" id="dash-content"></div>
+  <div class="footer">QuotePro — Intelligence Dashboard</div>
+</div>
+
+<!-- ============ MODALS ============ -->
+<div class="modal-bg hidden" id="m-export">
+  <div class="modal">
+    <div class="modal-head"><h3>Export Dashboard</h3><button class="x" onclick="closeModal('m-export')">✕</button></div>
+    <div class="modal-body" id="export-opts"></div>
+  </div>
+</div>
+
+<div class="modal-bg hidden" id="m-replace">
+  <div class="modal">
+    <div class="modal-head"><h3>Replace Values</h3><button class="x" onclick="closeModal('m-replace')">✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Column</label><select id="rp-col" style="width:100%"></select></div>
+      <div class="field"><label>Find</label><input id="rp-find" style="width:100%" placeholder="Text to find (exact or partial)"></div>
+      <div class="field"><label>Replace with</label><input id="rp-with" style="width:100%" placeholder="Replacement text"></div>
+      <label style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)">
+        <input type="checkbox" id="rp-exact" style="width:auto"> Match entire cell value only
+      </label>
+      <div id="rp-info" style="font-size:12.5px;color:var(--muted)"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('m-replace')">Cancel</button>
+      <button class="btn btn-primary" id="rp-apply">Apply Replace</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg hidden" id="m-smart">
+  <div class="modal wide">
+    <div class="modal-head"><h3>Smart Replace Similar Names</h3><button class="x" onclick="closeModal('m-smart')">✕</button></div>
+    <div class="modal-body">
+      <p style="font-size:12.5px;color:var(--muted)">Groups of customer names that look like the same company. Each group merges into its most frequent spelling.</p>
+      <div id="smart-list" style="display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('m-smart')">Cancel</button>
+      <button class="btn btn-primary" id="smart-apply">Merge Selected Groups</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg hidden" id="m-users">
+  <div class="modal wide">
+    <div class="modal-head"><h3>User Management</h3><button class="x" onclick="closeModal('m-users')">✕</button></div>
+    <div class="modal-body">
+      <div id="users-list" style="display:flex;flex-direction:column;gap:8px"></div>
+      <div class="card" style="box-shadow:none">
+        <h3>Add User</h3>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <input id="nu-name" placeholder="Username" style="flex:1;min-width:120px">
+          <input id="nu-pass" type="password" placeholder="Password" style="flex:1;min-width:120px">
+          <select id="nu-role"><option value="user">User</option><option value="admin">Admin</option></select>
+          <button class="btn btn-primary btn-sm" id="nu-add">Add</button>
+        </div>
+      </div>
+      <div id="totp-setup" class="hidden card" style="box-shadow:none">
+        <h3>Enable Two-Factor (TOTP)</h3>
+        <p style="font-size:12.5px;color:var(--muted);margin-bottom:8px">Add this secret to any authenticator app (Google Authenticator, Authy…), then enter the current code to activate.</p>
+        <div class="totp-secret" id="totp-secret-txt"></div>
+        <div style="display:flex;gap:10px;margin-top:10px">
+          <input id="totp-verify-code" placeholder="6-digit code" maxlength="6" inputmode="numeric" style="flex:1">
+          <button class="btn btn-ok btn-sm" id="totp-activate">Activate 2FA</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg hidden" id="m-confirm">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-head"><h3 id="cf-title">Confirm</h3><button class="x" onclick="closeModal('m-confirm')">✕</button></div>
+    <div class="modal-body"><p id="cf-msg" style="font-size:13.5px;color:var(--muted)"></p></div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('m-confirm')">Cancel</button>
+      <button class="btn btn-primary" id="cf-yes">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="overlay"><div class="spinner"></div><div class="msg" id="overlay-msg">Reading data…</div></div>
+<div class="toast-wrap" id="toasts"></div>
+
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script>
+'use strict';
+/* ================================================================
+   QuotePro Suite — single-file BI dashboard
+   Modules: Quotation Dashboard · PMC Dashboard
+   ================================================================ */
+
+/* ---------------- state ---------------- */
+const S = {
+  user: null,               // {u, role}
+  pendingUser: null,        // awaiting 2FA
+  mode: null,               // 'quotation' | 'pmc'
+  fileName: '',
+  rawHeader: [],            // raw header cells
+  rawRows: [],              // raw data rows (array of arrays)
+  allData: [],              // parsed records
+  gfData: [],               // globally filtered records
+  filters: {},
+  charts: {},
+  tab: 'overview',
+  page: 1, sortKey: null, sortDir: 1, search: '',
+  userLabel: 'User',        // dynamic label for quotation contact column
+  totpPending: null,        // {idx, secret} during 2FA setup
+};
+const LSK_USERS = 'qps_users_v1', LSK_THEME = 'qps_theme';
+
+/* ---------------- tiny helpers ---------------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const cv = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+const SERIES = () => [cv('--s1'),cv('--s2'),cv('--s3'),cv('--s4'),cv('--s5'),cv('--s6'),cv('--s7'),cv('--s8')];
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function toast(msg, kind){ const t=document.createElement('div'); t.className='toast '+(kind||''); t.textContent=msg;
+  $('toasts').appendChild(t); setTimeout(()=>t.remove(), 3800); }
+function overlay(msg){ if(msg===false){$('overlay').classList.add('hidden');return;} $('overlay-msg').textContent=msg; $('overlay').classList.remove('hidden'); }
+function openModal(id){ $(id).classList.remove('hidden'); }
+function closeModal(id){ $(id).classList.add('hidden'); }
+function confirmBox(title, msg, onYes){
+  $('cf-title').textContent=title; $('cf-msg').textContent=msg;
+  const btn=$('cf-yes'), clone=btn.cloneNode(true); btn.parentNode.replaceChild(clone,btn);
+  clone.addEventListener('click', ()=>{ closeModal('m-confirm'); onYes(); });
+  openModal('m-confirm');
+}
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+  $(id).classList.remove('hidden');
+  window.scrollTo(0,0);
+}
+function fmtInt(n){ return (n||0).toLocaleString('en-US',{maximumFractionDigits:0}); }
+function fmtAED(n){ return 'AED ' + (n||0).toLocaleString('en-US',{maximumFractionDigits:0}); }
+function fmtAEDc(n){ n=n||0;
+  if(Math.abs(n)>=1e6) return 'AED '+(n/1e6).toFixed(2)+'M';
+  if(Math.abs(n)>=1e4) return 'AED '+(n/1e3).toFixed(1)+'K';
+  return 'AED '+n.toLocaleString('en-US',{maximumFractionDigits:0}); }
+function pct(a,b){ return b>0 ? Math.round(a/b*1000)/10 : 0; }
+function fmtDate(d){ return d instanceof Date && !isNaN(d) ? String(d.getDate()).padStart(2,'0')+' '+MONTHS[d.getMonth()]+' '+d.getFullYear() : '—'; }
+function fmtDateTime(d){ return d instanceof Date && !isNaN(d) ? fmtDate(d)+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0') : '—'; }
+function isoDate(d){ return d instanceof Date && !isNaN(d) ? d.toISOString().slice(0,10) : ''; }
+function monthKey(d){ return d instanceof Date && !isNaN(d) ? d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0') : null; }
+function monthLabel(k){ const [y,m]=k.split('-'); return MONTHS[+m-1]+" '"+y.slice(2); }
+
+/* ---------------- value parsing ---------------- */
+function cleanCell(v){
+  if(typeof v!=='string') return v;
+  return v.replace(/[\u200B-\u200D\uFEFF\u00A0]/g,' ').replace(/\s+/g,' ').trim();
+}
+function parseDateVal(v){
+  if(v==null || v==='') return null;
+  if(v instanceof Date) return isNaN(v) ? null : v;
+  if(typeof v==='number'){                      // Excel serial date
+    if(v>20000 && v<80000){ const d=new Date(Math.round((v-25569)*86400*1000)); return isNaN(d)?null:d; }
+    return null;
+  }
+  let s=String(v).trim().replace(/\s*\(.*?\)\s*$/,'');    // strip "( 11 )" style suffixes
+  if(!s) return null;
+  let m=s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/);   // dd/mm/yyyy (UAE convention)
+  if(m){
+    let dd=+m[1], mm=+m[2], yy=+m[3]; if(yy<100) yy+=2000;
+    if(mm>12 && dd<=12){ [dd,mm]=[mm,dd]; }
+    if(mm>=1 && mm<=12 && dd>=1 && dd<=31){ const d=new Date(yy,mm-1,dd); return isNaN(d)?null:d; }
+  }
+  const d=new Date(s); return isNaN(d) ? null : d;
+}
+function parseNumVal(v){
+  if(v==null || v==='') return 0;
+  if(typeof v==='number') return isFinite(v)?v:0;
+  const n=parseFloat(String(v).replace(/[^0-9.\-]/g,'')); return isFinite(n)?n:0;
+}
+
+/* ---------------- header matching ---------------- */
+const normH = h => String(h??'').toLowerCase().replace(/[^a-z0-9]/g,'');
+/* returns all column indexes matching the FIRST pattern group that hits */
+function findCols(header, patterns){
+  const nh = header.map(normH);
+  for(const p of patterns){
+    const hits=[]; nh.forEach((h,i)=>{ if(h && h.includes(p)) hits.push(i); });
+    if(hits.length) return hits;
+  }
+  return [];
+}
+function findCol(header, patterns){ const c=findCols(header, patterns); return c.length?c[0]:-1; }
+/* among duplicate header candidates, pick the column with most parseable dates */
+function bestDateCol(cands, rows){
+  if(cands.length<=1) return cands[0] ?? -1;
+  let best=-1, bestScore=-1;
+  for(const c of cands){
+    let score=0;
+    for(let i=0;i<rows.length;i++) if(parseDateVal(rows[i][c])) score++;
+    if(score>bestScore){ bestScore=score; best=c; }
+  }
+  return best;
+}
+
+/* ================================================================
+   AUTH  (browser-local demo accounts — not server authentication)
+   ================================================================ */
+async function digest(str){
+  try{
+    const buf=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+  }catch(e){ /* non-secure context fallback */
+    let h=5381; for(let i=0;i<str.length;i++) h=((h<<5)+h+str.charCodeAt(i))>>>0;
+    return 'x'+h.toString(16);
+  }
+}
+const hashPw = (u,p) => digest('qps|'+u.toLowerCase()+'|'+p);
+function loadUsers(){ try{ return JSON.parse(localStorage.getItem(LSK_USERS))||[]; }catch(e){ return []; } }
+function saveUsers(list){ localStorage.setItem(LSK_USERS, JSON.stringify(list)); }
+async function seedUsers(){
+  if(loadUsers().length) return;
+  saveUsers([
+    {u:'Babu', h:await hashPw('Babu','Babu@2026'), role:'admin', totp:null, totpOn:false},
+    {u:'user', h:await hashPw('user','User@2026'), role:'user',  totp:null, totpOn:false},
+  ]);
+}
+
+/* ---- TOTP (RFC 6238, HMAC-SHA1 via WebCrypto) ---- */
+const B32='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+function b32encode(bytes){ let bits='', out='';
+  bytes.forEach(b=>bits+=b.toString(2).padStart(8,'0'));
+  for(let i=0;i+5<=bits.length;i+=5) out+=B32[parseInt(bits.slice(i,i+5),2)];
+  return out; }
+function b32decode(str){ let bits='', out=[];
+  for(const c of str.toUpperCase().replace(/=+$/,'')){ const v=B32.indexOf(c); if(v<0) continue; bits+=v.toString(2).padStart(5,'0'); }
+  for(let i=0;i+8<=bits.length;i+=8) out.push(parseInt(bits.slice(i,i+8),2));
+  return new Uint8Array(out); }
+function genTotpSecret(){ const b=new Uint8Array(20); crypto.getRandomValues(b); return b32encode(b); }
+async function totpCode(secret, offset){
+  const key=await crypto.subtle.importKey('raw', b32decode(secret), {name:'HMAC',hash:'SHA-1'}, false, ['sign']);
+  let counter=Math.floor(Date.now()/1000/30)+(offset||0);
+  const buf=new ArrayBuffer(8), dv=new DataView(buf);
+  dv.setUint32(4, counter>>>0); dv.setUint32(0, Math.floor(counter/4294967296));
+  const sig=new Uint8Array(await crypto.subtle.sign('HMAC', key, buf));
+  const o=sig[19]&0x0f;
+  const code=((sig[o]&0x7f)<<24 | sig[o+1]<<16 | sig[o+2]<<8 | sig[o+3]) % 1000000;
+  return String(code).padStart(6,'0');
+}
+async function verifyTotp(secret, code){
+  for(const off of [-1,0,1]) if(await totpCode(secret,off)===String(code).trim()) return true;
+  return false;
+}
+
+/* ---- login flow ---- */
+$('login-form').addEventListener('submit', async e=>{
+  e.preventDefault(); $('li-err').textContent='';
+  const u=$('li-user').value.trim(), p=$('li-pass').value;
+  const users=loadUsers();
+  const rec=users.find(x=>x.u.toLowerCase()===u.toLowerCase());
+  if(!rec || rec.h!==await hashPw(rec.u,p)){ $('li-err').textContent='Invalid username or password.'; return; }
+  if(rec.totpOn && rec.totp){
+    S.pendingUser=rec;
+    $('login-form').classList.add('hidden'); $('totp-form').classList.remove('hidden'); $('li-totp').focus();
+    return;
+  }
+  finishLogin(rec);
+});
+$('totp-form').addEventListener('submit', async e=>{
+  e.preventDefault(); $('totp-err').textContent='';
+  const rec=S.pendingUser; if(!rec) return;
+  if(await verifyTotp(rec.totp, $('li-totp').value)) finishLogin(rec);
+  else $('totp-err').textContent='Incorrect code. Try again.';
+});
+$('totp-back').addEventListener('click', ()=>{
+  S.pendingUser=null; $('totp-form').classList.add('hidden'); $('login-form').classList.remove('hidden');
+});
+function finishLogin(rec){
+  S.user={u:rec.u, role:rec.role};
+  S.pendingUser=null;
+  $('li-pass').value=''; $('li-totp').value='';
+  $('totp-form').classList.add('hidden'); $('login-form').classList.remove('hidden');
+  $('ms-user').textContent=rec.u+' ('+rec.role+')';
+  $('ms-users-btn').classList.toggle('hidden', rec.role!=='admin');
+  showScreen('screen-modules');
+}
+document.querySelectorAll('[data-logout]').forEach(b=>b.addEventListener('click', ()=>{
+  S.user=null; S.mode=null; destroyCharts();
+  showScreen('screen-login');
+}));
+
+/* ================================================================
+   THEME
+   ================================================================ */
+function setTheme(t){
+  document.documentElement.dataset.theme=t;
+  localStorage.setItem(LSK_THEME,t);
+  document.querySelectorAll('[data-themesel]').forEach(s=>s.value=t);
+  if(!$('screen-dash').classList.contains('hidden')) renderDashboard();  // recolor charts
+}
+document.querySelectorAll('[data-themesel]').forEach(s=>s.addEventListener('change', e=>setTheme(e.target.value)));
+
+/* ================================================================
+   MODULE / NAVIGATION
+   ================================================================ */
+function openModule(mode){
+  S.mode=mode;
+  const q = mode==='quotation';
+  $('up-title').textContent = q?'QuotePro Dashboard':'PMC Dashboard';
+  $('up-badge').textContent = q?'Quotation Upload':'PMC Upload';
+  $('up-head').textContent  = q?'Upload Quotation Data':'Upload PMC Contract Data';
+  $('up-sub').textContent   = q?'Drop your quotation summary Excel export below'
+                               :'Drop your PMC contract tracker Excel export below';
+  showScreen('screen-upload');
+}
+
+/* ================================================================
+   UPLOAD
+   ================================================================ */
+const dz=$('drop-zone'), fi=$('file-input');
+dz.addEventListener('click', ()=>fi.click());
+dz.addEventListener('dragover', e=>{ e.preventDefault(); dz.classList.add('drag'); });
+dz.addEventListener('dragleave', ()=>dz.classList.remove('drag'));
+dz.addEventListener('drop', e=>{ e.preventDefault(); dz.classList.remove('drag');
+  if(e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]); });
+fi.addEventListener('change', ()=>{ if(fi.files.length) handleFile(fi.files[0]); fi.value=''; });
+
+function pickSheet(wb){
+  const names=wb.SheetNames;
+  const want = S.mode==='quotation' ? /quot/i : /pmc|track/i;
+  return names.find(n=>want.test(n)) || names[0];
+}
+function handleFile(file){
+  if(!/\.(xlsx|xls|csv)$/i.test(file.name)){ toast('Unsupported file type — use .xlsx, .xls or .csv','bad'); return; }
+  overlay('Reading data…');
+  const rd=new FileReader();
+  rd.onerror=()=>{ overlay(false); toast('Could not read the file.','bad'); };
+  rd.onload=e=>{
+    setTimeout(()=>{                       // let the overlay paint
+      try{
+        overlay('Parsing records…');
+        const wb=XLSX.read(e.target.result, {type:'array', cellDates:true});
+        const ws=wb.Sheets[pickSheet(wb)];
+        const rows=XLSX.utils.sheet_to_json(ws, {header:1, defval:null, raw:true});
+        // first row with ≥2 non-empty cells = header
+        let hi=rows.findIndex(r=>r && r.filter(c=>c!=null && String(c).trim()!=='').length>=2);
+        if(hi<0){ overlay(false); toast('No data found in the selected sheet.','bad'); return; }
+        S.fileName=file.name;
+        S.rawHeader=rows[hi].map(c=>cleanCell(c)==null?'':String(cleanCell(c)));
+        S.rawRows=rows.slice(hi+1).filter(r=>r && r.length);
+        overlay(false);
+        openCleanScreen();
+      }catch(err){
+        console.error(err); overlay(false); toast('Failed to parse workbook: '+err.message,'bad');
+      }
+    }, 60);
+  };
+  rd.readAsArrayBuffer(file);
+}
+
+/* ================================================================
+   TRIM & CLEAN
+   ================================================================ */
+function rowIsEmpty(r){ return r.every(c=>c==null || String(c).trim()===''); }
+function cleanStats(){
+  const rows=S.rawRows;
+  let empty=0, ws=0;
+  const seen=new Map(); let dups=0;
+  rows.forEach(r=>{
+    if(rowIsEmpty(r)){ empty++; return; }
+    const key=JSON.stringify(r.map(c=>c instanceof Date?+c:c));
+    seen.set(key,(seen.get(key)||0)+1);
+    r.forEach(c=>{ if(typeof c==='string' && (c!==c.trim() || /[\u200B-\u200D\uFEFF\u00A0]|\s{2,}/.test(c))) ws++; });
+  });
+  seen.forEach(n=>{ if(n>1) dups+=n-1; });
+  return {total:rows.length, empty, dups, ws};
+}
+function openCleanScreen(){
+  const q=S.mode==='quotation';
+  $('cl-title').textContent=q?'QuotePro Dashboard':'PMC Dashboard';
+  $('cl-file').textContent='📄 '+S.fileName;
+  renderCleanScreen();
+  showScreen('screen-clean');
+}
+function renderCleanScreen(){
+  const st=cleanStats();
+  $('dq-grid').innerHTML=
+    `<div class="dq-card"><div class="v">${fmtInt(st.total)}</div><div class="l">Total Rows</div></div>`+
+    `<div class="dq-card ${st.empty?'warn':'ok'}"><div class="v">${fmtInt(st.empty)}</div><div class="l">Empty Rows</div></div>`+
+    `<div class="dq-card ${st.dups?'bad':'ok'}"><div class="v">${fmtInt(st.dups)}</div><div class="l">Duplicate Rows</div></div>`+
+    `<div class="dq-card ${st.ws?'warn':'ok'}"><div class="v">${fmtInt(st.ws)}</div><div class="l">Whitespace Issues</div></div>`;
+  const N=Math.min(8,S.rawRows.length);
+  $('prev-info').textContent=`first ${N} of ${fmtInt(S.rawRows.length)} rows`;
+  let html='<thead><tr>'+S.rawHeader.map(h=>`<th class="no-sort">${esc(h)}</th>`).join('')+'</tr></thead><tbody>';
+  for(let i=0;i<N;i++){
+    html+='<tr>'+S.rawHeader.map((_,c)=>{
+      let v=S.rawRows[i][c];
+      if(v instanceof Date) v=fmtDate(v);
+      return `<td>${esc(v==null?'':v)}</td>`;
+    }).join('')+'</tr>';
+  }
+  $('prev-table').innerHTML=html+'</tbody>';
+}
+function autoClean(){
+  const before=cleanStats();
+  const seen=new Set(); const out=[];
+  S.rawRows.forEach(r=>{
+    if(rowIsEmpty(r)) return;
+    const cleaned=r.map(cleanCell);
+    const key=JSON.stringify(cleaned.map(c=>c instanceof Date?+c:c));
+    if(seen.has(key)) return;
+    seen.add(key); out.push(cleaned);
+  });
+  S.rawRows=out;
+  const removed=before.total-out.length;
+  toast(`Clean complete — ${fmtInt(removed)} row(s) removed, ${fmtInt(before.ws)} whitespace issue(s) fixed`,'ok');
+}
+$('btn-autoclean').addEventListener('click', ()=>{ autoClean(); renderCleanScreen(); });
+$('btn-skip').addEventListener('click', ()=>enterDashboard(false));
+$('btn-proceed').addEventListener('click', ()=>enterDashboard(true));
+
+function enterDashboard(clean){
+  overlay('Parsing records…');
+  setTimeout(()=>{
+    try{
+      if(clean) autoClean();
+      S.allData = S.mode==='quotation' ? parseQuotationData() : parsePmcData();
+      if(!S.allData.length){ overlay(false); toast('No usable records found — check the file columns.','bad'); return; }
+      S.filters={}; S.tab='overview'; S.page=1; S.search=''; S.sortKey=null;
+      buildDashboardShell();
+      applyFilters();
+      overlay(false);
+      showScreen('screen-dash');
+    }catch(err){ console.error(err); overlay(false); toast('Parse error: '+err.message,'bad'); }
+  }, 60);
+}
+
+/* ================================================================
+   REPLACE VALUES MODAL  (operates on raw rows, then re-parses)
+   ================================================================ */
+function openReplaceModal(){
+  const sel=$('rp-col');
+  sel.innerHTML=S.rawHeader.map((h,i)=>`<option value="${i}">${esc(h||('Column '+(i+1)))}</option>`).join('');
+  $('rp-find').value=''; $('rp-with').value=''; $('rp-info').textContent='';
+  openModal('m-replace');
+}
+$('rp-apply').addEventListener('click', ()=>{
+  const col=+$('rp-col').value, find=$('rp-find').value, repl=$('rp-with').value, exact=$('rp-exact').checked;
+  if(!find){ $('rp-info').textContent='Enter text to find.'; return; }
+  let n=0;
+  S.rawRows.forEach(r=>{
+    const v=r[col]; if(v==null) return;
+    const s=String(v);
+    if(exact){ if(s.trim().toLowerCase()===find.trim().toLowerCase()){ r[col]=repl; n++; } }
+    else if(s.toLowerCase().includes(find.toLowerCase())){
+      r[col]=s.replace(new RegExp(find.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'), repl); n++;
+    }
+  });
+  closeModal('m-replace');
+  toast(`Replaced in ${fmtInt(n)} cell(s)`,'ok');
+  afterRawEdit();
+});
+function afterRawEdit(){
+  if(!$('screen-clean').classList.contains('hidden')) renderCleanScreen();
+  if(!$('screen-dash').classList.contains('hidden')){
+    S.allData = S.mode==='quotation' ? parseQuotationData() : parsePmcData();
+    buildDashboardShell(); applyFilters();
+  }
+}
+
+/* ================================================================
+   SMART REPLACE SIMILAR NAMES
+   ================================================================ */
+function nameKey(s){
+  return String(s||'').toLowerCase()
+    .replace(/\b(llc|l\.l\.c|fze|fzc|fzco|ltd|limited|inc|co|company|est|establishment|trading|general|grp|group)\b/g,'')
+    .replace(/[^a-z0-9]/g,'');
+}
+let smartGroups=[];
+function openSmartModal(){
+  const custCol = S.mode==='quotation'
+    ? findCol(S.rawHeader,['customername','customer','client'])
+    : findCol(S.rawHeader,['customername','customer']);
+  if(custCol<0){ toast('No customer column detected.','bad'); return; }
+  const byKey=new Map();
+  S.rawRows.forEach(r=>{
+    const v=cleanCell(r[custCol]); if(!v) return;
+    const k=nameKey(v); if(!k) return;
+    if(!byKey.has(k)) byKey.set(k,new Map());
+    const m=byKey.get(k); m.set(v,(m.get(v)||0)+1);
+  });
+  smartGroups=[];
+  byKey.forEach(m=>{
+    if(m.size<2) return;
+    const variants=[...m.entries()].sort((a,b)=>b[1]-a[1]);
+    smartGroups.push({col:custCol, canon:variants[0][0], variants});
+  });
+  const list=$('smart-list');
+  if(!smartGroups.length){ list.innerHTML='<p style="color:var(--muted);font-size:13px">✅ No similar customer names detected — data looks consistent.</p>'; }
+  else list.innerHTML=smartGroups.map((g,i)=>`
+    <label class="smart-group" style="display:block;cursor:pointer">
+      <div style="display:flex;gap:9px;align-items:center">
+        <input type="checkbox" checked data-sg="${i}" style="width:auto">
+        <span class="canon">${esc(g.canon)}</span>
+        <span style="font-size:11px;color:var(--faint)">← keep this spelling</span>
+      </div>
+      <div class="vars">${g.variants.map(([v,n])=>`${esc(v)} <b>(${n})</b>`).join(' · ')}</div>
+    </label>`).join('');
+  openModal('m-smart');
+}
+$('smart-apply').addEventListener('click', ()=>{
+  let n=0;
+  document.querySelectorAll('#smart-list input[data-sg]:checked').forEach(cb=>{
+    const g=smartGroups[+cb.dataset.sg];
+    S.rawRows.forEach(r=>{
+      const v=cleanCell(r[g.col]);
+      if(v && v!==g.canon && nameKey(v)===nameKey(g.canon)){ r[g.col]=g.canon; n++; }
+    });
+  });
+  closeModal('m-smart');
+  toast(`Merged ${fmtInt(n)} cell(s) into canonical names`,'ok');
+  afterRawEdit();
+});
+</script>
+<script>
+/* ================================================================
+   PARSERS
+   ================================================================ */
+function parseQuotationData(){
+  const H=S.rawHeader, R=S.rawRows;
+  const col={
+    quoteId:      findCol(H,['quotationnumber','quotationno','quoteid','quotationid','quoteref']),
+    customer:     findCol(H,['customername','customer','client']),
+    emirate:      findCol(H,['emirate','region']),
+    scope:        findCol(H,['scopeofwork','scope']),
+    brand:        findCol(H,['brand','make']),
+    model:        findCol(H,['model']),
+    quotationType:findCol(H,['quotationtype','quotetype']),
+    value:        findCol(H,['totalquotationvalue','quotationvalue','totalvalue','value','amount']),
+    contact:      findCol(H,['associatedcontact','salesperson','salesengineer','user']),
+    contactNumber:findCol(H,['contactnumber','phonenumber','mobile','phone']),
+    daysInterval: findCol(H,['daysinterval','responsedays']),
+    remarks:      findCol(H,['remarks','remark','comments','notes']),
+  };
+  // date columns can be duplicated (grouping label vs real date) → score candidates
+  col.sentDate     = bestDateCol(findCols(H,['quotationsentdate','sentdate','quotedate']), R);
+  col.approvedDate = bestDateCol(findCols(H,['dateapprovedbythecustomer','approveddate','dateapproved','approvaldate']), R);
+  col.enquiryDate  = bestDateCol(findCols(H,['enquirydate','inquirydate']), R);
+  S.userLabel = col.contact>=0 ? (H[col.contact]||'User') : 'User';
+  const get=(r,c)=>c>=0?cleanCell(r[c]):null;
+  const out=[];
+  R.forEach((r,i)=>{
+    const customer=get(r,col.customer), quoteId=get(r,col.quoteId);
+    if(!customer && !quoteId) return;                       // skip empty rows
+    const approvedDate=parseDateVal(get(r,col.approvedDate));
+    const rec={
+      sr:i+1,
+      quoteId:String(quoteId??''), customer:String(customer??''),
+      emirate:String(get(r,col.emirate)??''), scope:String(get(r,col.scope)??''),
+      brand:String(get(r,col.brand)??''), model:String(get(r,col.model)??''),
+      quotationType:String(get(r,col.quotationType)??''),
+      value:parseNumVal(get(r,col.value)),
+      contact:String(get(r,col.contact)??''),
+      contactNumber:String(get(r,col.contactNumber)??''),
+      sentDate:parseDateVal(get(r,col.sentDate)),
+      approvedDate,
+      enquiryDate:parseDateVal(get(r,col.enquiryDate)),
+      daysInterval:col.daysInterval>=0?parseNumVal(get(r,col.daysInterval)):null,
+      remarks:String(get(r,col.remarks)??''),
+      status: approvedDate ? 'Approved' : 'Pending',
+    };
+    rec.reportDate=getReportDate(rec);
+    out.push(rec);
+  });
+  return out;
+}
+/* Approved rows report on Approved Date; Pending rows fall back to Sent Date */
+function getReportDate(r){ return r.approvedDate || r.sentDate || r.enquiryDate || null; }
+
+function parsePmcData(){
+  const H=S.rawHeader, R=S.rawRows;
+  const col={
+    department:   findCol(H,['department','dept']),
+    customer:     findCol(H,['customername','customer']),
+    customerType: findCol(H,['isthecustomer','customertype','existingnew']),
+    contractNumber:findCol(H,['pmccontractnumber','contractnumber','contractno','quoteref','quotationref','quoteid']),
+    location:     findCol(H,['location','emirate','region']),
+    status:       findCol(H,['approvalstatus','status']),
+    approvedBy:   findCol(H,['approvedby']),
+    trucks:       findCol(H,['nooftrucks','trucks','noofmachines','machines','qty']),
+    remarks:      findCol(H,['remarks','remark','comments']),
+    createdBy:    findCol(H,['createdby']),
+    brand:        findCol(H,['brand','make']),
+    years:        findCol(H,['numberofyearoffered','numberofyearsoffered','yearsoffered','noofyears','years','duration']),
+    value:        findCol(H,['totalcontractvalue','contractvalue','totalvalue','value','amount']),
+  };
+  col.approvedDate=bestDateCol(findCols(H,['approveddate','dateapproved']), R);
+  col.expiryDate  =bestDateCol(findCols(H,['expirydate','expiry','enddate']), R);
+  col.createdTime =bestDateCol(findCols(H,['createdtime','createddate','createdon']), R);
+  col.monthYear   =bestDateCol(findCols(H,['monthyear','monthandyear']), R);   // legacy tracker
+  const get=(r,c)=>c>=0?cleanCell(r[c]):null;
+  const today=new Date(); today.setHours(0,0,0,0);
+  const out=[];
+  R.forEach((r,i)=>{
+    const customer=get(r,col.customer), contractNumber=get(r,col.contractNumber);
+    if(!customer && !contractNumber) return;
+    const expiryDate=parseDateVal(get(r,col.expiryDate));
+    const statusTxt=String(get(r,col.status)??'');
+    const approvedDate=parseDateVal(get(r,col.approvedDate));
+    const rec={
+      sr:i+1,
+      department:String(get(r,col.department)??''),
+      customer:String(customer??''),
+      customerType:String(get(r,col.customerType)??''),
+      contractNumber:String(contractNumber??''),
+      location:String(get(r,col.location)??''),
+      status:statusTxt,
+      approvedBy:String(get(r,col.approvedBy)??''),
+      approvedDate, expiryDate,
+      trucks:parseNumVal(get(r,col.trucks)),
+      remarks:String(get(r,col.remarks)??''),
+      createdBy:String(get(r,col.createdBy)??''),
+      createdTime:parseDateVal(get(r,col.createdTime)),
+      brand:String(get(r,col.brand)??''),
+      years:parseNumVal(get(r,col.years)),
+      value:col.value>=0?parseNumVal(get(r,col.value)):0,
+      monthYear:parseDateVal(get(r,col.monthYear)),
+    };
+    rec.contractStatus = expiryDate ? (expiryDate>=today?'Active':'Expired') : 'Unknown';
+    rec.isApproved = /approv/i.test(statusTxt) && !/not|pend|reject|await/i.test(statusTxt) || (!statusTxt && !!approvedDate);
+    rec.reportDate = rec.approvedDate || rec.createdTime || rec.monthYear || rec.expiryDate || null;
+    out.push(rec);
+  });
+  return out;
+}
+
+/* ================================================================
+   FILTERS
+   ================================================================ */
+function uniqVals(field){
+  const s=new Set();
+  S.allData.forEach(r=>{ const v=r[field]; if(v!=null && String(v).trim()!=='') s.add(String(v)); });
+  return [...s].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+}
+function filterConfig(){
+  if(S.mode==='quotation') return [
+    {k:'year',label:'Year',opts:()=>uniqYears()},
+    {k:'month',label:'Month',opts:()=>MONTHS.map((m,i)=>({v:String(i),t:m}))},
+    {k:'customer',label:'Customer',opts:()=>uniqVals('customer')},
+    {k:'emirate',label:'Emirate',opts:()=>uniqVals('emirate')},
+    {k:'contact',label:S.userLabel,opts:()=>uniqVals('contact')},
+    {k:'brand',label:'Brand',opts:()=>uniqVals('brand')},
+    {k:'quotationType',label:'Quotation Type',opts:()=>uniqVals('quotationType')},
+    {k:'status',label:'Status',opts:()=>['Approved','Pending']},
+    {k:'minVal',label:'Min Value',num:true},
+    {k:'maxVal',label:'Max Value',num:true},
+  ];
+  return [
+    {k:'year',label:'Year',opts:()=>uniqYears()},
+    {k:'month',label:'Month',opts:()=>MONTHS.map((m,i)=>({v:String(i),t:m}))},
+    {k:'department',label:'Department',opts:()=>uniqVals('department')},
+    {k:'customer',label:'Customer',opts:()=>uniqVals('customer')},
+    {k:'location',label:'Location',opts:()=>uniqVals('location')},
+    {k:'brand',label:'Brand',opts:()=>uniqVals('brand')},
+    {k:'customerType',label:'Customer Type',opts:()=>uniqVals('customerType')},
+    {k:'status',label:'Approval Status',opts:()=>uniqVals('status')},
+    {k:'contractStatus',label:'Contract Status',opts:()=>['Active','Expired']},
+    {k:'years',label:'Years Offered',opts:()=>uniqVals('years')},
+    {k:'remarks',label:'Remarks',opts:()=>uniqVals('remarks')},
+  ];
+}
+function uniqYears(){
+  const s=new Set();
+  S.allData.forEach(r=>{ const d=r.reportDate; if(d) s.add(d.getFullYear()); });
+  return [...s].sort((a,b)=>b-a).map(String);
+}
+function buildFilterBar(){
+  const cfg=filterConfig();
+  $('filterbar').innerHTML = cfg.map(f=>{
+    if(f.num) return `<div class="f-item"><label>${esc(f.label)}</label>
+      <input type="number" class="f-num" data-f="${f.k}" placeholder="AED" min="0"></div>`;
+    const opts=f.opts().map(o=>{
+      const v=typeof o==='object'?o.v:o, t=typeof o==='object'?o.t:o;
+      return `<option value="${esc(v)}">${esc(t)}</option>`;
+    }).join('');
+    return `<div class="f-item"><label>${esc(f.label)}</label>
+      <select data-f="${f.k}"><option value="">All</option>${opts}</select></div>`;
+  }).join('') + `<button class="btn btn-sm btn-ghost" id="btn-clearf" style="align-self:flex-end">✕ Clear All</button>
+  <span class="result-count" id="f-count"></span>`;
+  document.querySelectorAll('#filterbar [data-f]').forEach(el=>{
+    el.addEventListener('change', ()=>{ readFilters(); applyFilters(); });
+    if(el.tagName==='INPUT') el.addEventListener('input', debounce(()=>{ readFilters(); applyFilters(); },350));
+  });
+  $('btn-clearf').addEventListener('click', ()=>{
+    S.filters={};
+    document.querySelectorAll('#filterbar [data-f]').forEach(el=>el.value='');
+    applyFilters();
+  });
+}
+function debounce(fn,ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; }
+function readFilters(){
+  const f={};
+  document.querySelectorAll('#filterbar [data-f]').forEach(el=>{ if(el.value!=='') f[el.dataset.f]=el.value; });
+  S.filters=f;
+}
+function applyFilters(){
+  const f=S.filters;
+  S.gfData=S.allData.filter(r=>{
+    const d=r.reportDate;
+    if(f.year  && (!d || String(d.getFullYear())!==f.year)) return false;
+    if(f.month!==undefined && f.month!=='' && (!d || d.getMonth()!==+f.month)) return false;
+    if(S.mode==='quotation'){
+      if(f.customer && r.customer!==f.customer) return false;
+      if(f.emirate && r.emirate!==f.emirate) return false;
+      if(f.contact && r.contact!==f.contact) return false;
+      if(f.brand && r.brand!==f.brand) return false;
+      if(f.quotationType && r.quotationType!==f.quotationType) return false;
+      if(f.status && r.status!==f.status) return false;
+      if(f.minVal && r.value<+f.minVal) return false;
+      if(f.maxVal && r.value>+f.maxVal) return false;
+    }else{
+      if(f.department && r.department!==f.department) return false;
+      if(f.customer && r.customer!==f.customer) return false;
+      if(f.location && r.location!==f.location) return false;
+      if(f.brand && r.brand!==f.brand) return false;
+      if(f.customerType && r.customerType!==f.customerType) return false;
+      if(f.status && r.status!==f.status) return false;
+      if(f.contractStatus && r.contractStatus!==f.contractStatus) return false;
+      if(f.years && String(r.years)!==f.years) return false;
+      if(f.remarks && r.remarks!==f.remarks) return false;
+    }
+    return true;
+  });
+  S.page=1;
+  renderChips();
+  $('f-count').textContent=`${fmtInt(S.gfData.length)} of ${fmtInt(S.allData.length)} records`;
+  renderDashboard();
+}
+function renderChips(){
+  const cfg=filterConfig();
+  $('chips').innerHTML=Object.entries(S.filters).map(([k,v])=>{
+    const f=cfg.find(x=>x.k===k); if(!f) return '';
+    let disp=v;
+    if(k==='month') disp=MONTHS[+v];
+    if(f.num) disp='AED '+(+v).toLocaleString();
+    return `<span class="chip">${esc(f.label)}: ${esc(disp)} <button data-chip="${k}" title="Remove">✕</button></span>`;
+  }).join('');
+  document.querySelectorAll('[data-chip]').forEach(b=>b.addEventListener('click', ()=>{
+    delete S.filters[b.dataset.chip];
+    const el=document.querySelector(`#filterbar [data-f="${b.dataset.chip}"]`); if(el) el.value='';
+    applyFilters();
+  }));
+}
+
+/* ================================================================
+   DASHBOARD SHELL
+   ================================================================ */
+function buildDashboardShell(){
+  const q=S.mode==='quotation';
+  $('d-title').textContent=q?'QuotePro Dashboard':'PMC Dashboard';
+  $('d-badge').textContent=q?'Quotation Analytics':'PMC Analytics';
+  $('btn-export').classList.toggle('hidden', S.user?.role!=='admin');
+  const tabs=q
+    ? [['overview','Overview'],['quotations','Quotations'],['customers','Customers'],['regions','Regions'],['brands','Brands'],['analytics','Analytics']]
+    : [['overview','Overview'],['contracts','Contracts'],['customers','Customers'],['analytics','Analytics']];
+  $('tabbar').innerHTML=tabs.map(([k,t])=>`<button data-tab="${k}" class="${k===S.tab?'active':''}">${t}</button>`).join('');
+  document.querySelectorAll('#tabbar [data-tab]').forEach(b=>b.addEventListener('click', ()=>{
+    S.tab=b.dataset.tab; S.page=1; S.search=''; S.sortKey=null;
+    document.querySelectorAll('#tabbar button').forEach(x=>x.classList.toggle('active',x===b));
+    renderDashboard();
+  }));
+  buildFilterBar();
+}
+$('btn-newupload').addEventListener('click', ()=>{
+  confirmBox('Start a new upload?','Current data and filters will be discarded. Continue?',()=>{
+    destroyCharts(); openModule(S.mode);
+  });
+});
+
+/* ================================================================
+   CHART HELPERS  (Chart.js, themed from CSS variables)
+   ================================================================ */
+function destroyCharts(){ Object.values(S.charts).forEach(c=>{try{c.destroy()}catch(e){}}); S.charts={}; }
+function baseOpts(extra){
+  Chart.defaults.font.family='system-ui,-apple-system,"Segoe UI",Roboto,sans-serif';
+  Chart.defaults.font.size=11;
+  return Object.assign({
+    responsive:true, maintainAspectRatio:false,
+    plugins:{
+      legend:{labels:{color:cv('--tick'), boxWidth:10, boxHeight:10, usePointStyle:true, pointStyle:'circle', padding:14}},
+      tooltip:{backgroundColor:cv('--card2'), titleColor:cv('--text'), bodyColor:cv('--tick'),
+        borderColor:cv('--border2'), borderWidth:1, padding:10, cornerRadius:8},
+    },
+    scales:{
+      x:{grid:{color:'transparent'}, ticks:{color:cv('--tick')}, border:{color:cv('--border')}},
+      y:{grid:{color:cv('--grid')}, ticks:{color:cv('--tick')}, border:{display:false}, beginAtZero:true},
+    },
+  }, extra||{});
+}
+function mkChart(canvasId, cfg){
+  const el=$(canvasId); if(!el) return;
+  if(S.charts[canvasId]){ try{S.charts[canvasId].destroy()}catch(e){} }
+  S.charts[canvasId]=new Chart(el.getContext('2d'), cfg);
+}
+function donutCfg(labels, data, colors, centerNote){
+  return {
+    type:'doughnut',
+    data:{labels, datasets:[{data, backgroundColor:colors, borderColor:cv('--card'), borderWidth:2, hoverOffset:6}]},
+    options:{responsive:true, maintainAspectRatio:false, cutout:'68%',
+      plugins:{
+        legend:{position:'bottom', labels:{color:cv('--tick'), boxWidth:10, boxHeight:10, usePointStyle:true, pointStyle:'circle', padding:12}},
+        tooltip:{backgroundColor:cv('--card2'), titleColor:cv('--text'), bodyColor:cv('--tick'),
+          borderColor:cv('--border2'), borderWidth:1, padding:10, cornerRadius:8,
+          callbacks:{label:c=>` ${c.label}: ${centerNote==='aed'?fmtAEDc(c.parsed):fmtInt(c.parsed)} (${pct(c.parsed, c.dataset.data.reduce((a,b)=>a+b,0))}%)`}},
+      }},
+  };
+}
+function monthlySeries(rows, valueFn){
+  const m=new Map();
+  rows.forEach(r=>{ const k=monthKey(r.reportDate); if(!k) return;
+    m.set(k,(m.get(k)||0)+valueFn(r)); });
+  const keys=[...m.keys()].sort();
+  return {keys, labels:keys.map(monthLabel), values:keys.map(k=>m.get(k))};
+}
+function monthlyKeys(rows){
+  const s=new Set(); rows.forEach(r=>{ const k=monthKey(r.reportDate); if(k) s.add(k); });
+  return [...s].sort();
+}
+function groupSum(rows, keyFn, valFn){
+  const m=new Map();
+  rows.forEach(r=>{ const k=keyFn(r); if(k==null||k==='') return; m.set(k,(m.get(k)||0)+valFn(r)); });
+  return m;
+}
+</script>
+<script>
+/* ================================================================
+   DASHBOARD RENDER (per tab)
+   ================================================================ */
+function renderDashboard(){
+  destroyCharts();
+  const c=$('dash-content');
+  if(S.mode==='quotation'){
+    ({overview:qOverview, quotations:qQuotations, customers:qCustomers,
+      regions:qRegions, brands:qBrands, analytics:qAnalytics}[S.tab]||qOverview)(c);
+  }else{
+    ({overview:pOverview, contracts:pContracts, customers:pCustomers,
+      analytics:pAnalytics}[S.tab]||pOverview)(c);
+  }
+}
+function kpiHTML(list, cols){
+  return `<div class="kpi-grid" style="grid-template-columns:repeat(auto-fit,minmax(${cols||185}px,1fr))">`+
+    list.map(k=>`<div class="kpi ${k.cls||''}"><div class="l">${k.l}</div><div class="v" title="${esc(k.v)}">${k.v}</div><div class="s">${k.s||''}</div></div>`).join('')+'</div>';
+}
+function chartCard(id, title, sub, span, h){
+  return `<div class="chart-card span-${span||6}"><h3>${title}</h3><div class="csub">${sub||''}</div>
+    <div class="chart-box ${h||''}"><canvas id="${id}"></canvas></div></div>`;
+}
+
+/* ================= GENERIC DATA TABLE ================= */
+function renderDataTable(el, cols, rows, opts){
+  opts=opts||{};
+  let data=rows;
+  if(S.search){
+    const q=S.search.toLowerCase();
+    data=data.filter(r=>cols.some(c=>{
+      let v=r[c.k]; if(v instanceof Date) v=fmtDate(v);
+      return String(v??'').toLowerCase().includes(q);
+    }));
+  }
+  if(S.sortKey){
+    const k=S.sortKey, dir=S.sortDir;
+    data=[...data].sort((a,b)=>{
+      let x=a[k], y=b[k];
+      if(x instanceof Date) x=+x; if(y instanceof Date) y=+y;
+      if(typeof x==='number' && typeof y==='number') return (x-y)*dir;
+      return String(x??'').localeCompare(String(y??''),undefined,{numeric:true})*dir;
+    });
+  }
+  const PER=50, pages=Math.max(1,Math.ceil(data.length/PER));
+  if(S.page>pages) S.page=pages;
+  const slice=data.slice((S.page-1)*PER, S.page*PER);
+  let html='';
+  if(opts.search!==false){
+    html+=`<div class="table-tools">
+      <input type="search" id="tbl-search" placeholder="Search ${opts.what||'records'}…" value="${esc(S.search)}">
+      <span class="tt-count">${fmtInt(data.length)} record(s) · page ${S.page}/${pages}</span></div>`;
+  }
+  html+='<div class="tbl-wrap"><table class="tbl"><thead><tr>'+cols.map(c=>
+    `<th data-sort="${c.k}" class="${c.num?'num':''}">${c.t}${S.sortKey===c.k?` <span class="arr">${S.sortDir>0?'▲':'▼'}</span>`:''}</th>`
+  ).join('')+'</tr></thead><tbody>';
+  if(!slice.length) html+=`<tr><td colspan="${cols.length}" style="text-align:center;color:var(--muted);padding:26px">No matching records</td></tr>`;
+  slice.forEach((r,i)=>{
+    html+='<tr>'+cols.map(c=>{
+      let v=r[c.k];
+      if(c.fmt) v=c.fmt(v,r,(S.page-1)*PER+i);
+      else if(v instanceof Date) v=esc(fmtDate(v));
+      else v=esc(v==null||v===''?'—':v);
+      return `<td class="${c.num?'num':''}">${v}</td>`;
+    }).join('')+'</tr>';
+  });
+  html+='</tbody></table></div>';
+  html+=`<div class="pager">
+    <button class="btn btn-sm" id="pg-prev" ${S.page<=1?'disabled':''}>← Prev</button>
+    <span>Page ${S.page} of ${pages}</span>
+    <button class="btn btn-sm" id="pg-next" ${S.page>=pages?'disabled':''}>Next →</button></div>`;
+  el.innerHTML=`<div class="card">${html}</div>`;
+  const si=$('tbl-search');
+  if(si) si.addEventListener('input', debounce(()=>{ S.search=si.value; S.page=1; renderDashboard();
+    setTimeout(()=>{const s=$('tbl-search'); if(s){s.focus(); s.setSelectionRange(s.value.length,s.value.length);}},0); },300));
+  if($('pg-prev')) $('pg-prev').addEventListener('click', ()=>{ S.page--; renderDashboard(); });
+  if($('pg-next')) $('pg-next').addEventListener('click', ()=>{ S.page++; renderDashboard(); });
+  el.querySelectorAll('th[data-sort]').forEach(th=>th.addEventListener('click', ()=>{
+    const k=th.dataset.sort;
+    if(S.sortKey===k) S.sortDir*=-1; else { S.sortKey=k; S.sortDir=1; }
+    renderDashboard();
+  }));
+}
+const pillStatus=v=>v==='Approved'?`<span class="pill pill-ok">Approved</span>`:`<span class="pill pill-warn">Pending</span>`;
+const pillContract=v=>v==='Active'?`<span class="pill pill-ok">Active</span>`
+  : v==='Expired'?`<span class="pill pill-bad">Expired</span>`:`<span class="pill pill-mut">—</span>`;
+
+/* ================================================================
+   QUOTATION — OVERVIEW
+   ================================================================ */
+function qStats(rows){
+  const total=rows.length;
+  const approved=rows.filter(r=>r.status==='Approved');
+  const pending=rows.filter(r=>r.status==='Pending');
+  const value=rows.reduce((a,r)=>a+r.value,0);
+  const customers=new Set(rows.map(r=>r.customer).filter(Boolean)).size;
+  const respRows=rows.filter(r=>r.daysInterval!=null && r.daysInterval>0);
+  const avgResp=respRows.length? respRows.reduce((a,r)=>a+r.daysInterval,0)/respRows.length : 0;
+  return {total, approved:approved.length, pending:pending.length, value, customers,
+    convRate:pct(approved.length,total), pendRate:pct(pending.length,total), avgResp};
+}
+function qOverview(c){
+  const st=qStats(S.gfData);
+  c.innerHTML=
+    kpiHTML([
+      {l:'Total Quotations', v:fmtInt(st.total), s:`<b>${fmtInt(st.customers)}</b> unique customers`},
+      {l:'Total Value', v:fmtAEDc(st.value), s:fmtAED(st.value), cls:'k-acc'},
+      {l:'Approved', v:fmtInt(st.approved), s:`<b>${st.convRate}%</b> conversion`, cls:'k-ok'},
+      {l:'Pending', v:fmtInt(st.pending), s:`<b>${st.pendRate}%</b> pending rate`, cls:'k-warn'},
+      {l:'Avg Response', v:st.avgResp?st.avgResp.toFixed(1)+' d':'—', s:'enquiry → quotation'},
+    ])+
+    `<div class="charts-grid">`+
+      chartCard('ch-rev','Revenue Trend','Monthly quotation value (AED) by report date',8)+
+      chartCard('ch-appr','Approval Rate','Share of quotations approved',4)+
+      chartCard('ch-vol','Monthly Volume','Approved vs pending quotations per month',7)+
+      chartCard('ch-brand','Brand Mix','Top brands by quotation value',5)+
+    `</div>`;
+  const ms=monthlySeries(S.gfData, r=>r.value);
+  mkChart('ch-rev',{type:'line',
+    data:{labels:ms.labels, datasets:[{label:'Value (AED)', data:ms.values,
+      borderColor:cv('--s1'), backgroundColor:cv('--s1')+'22', borderWidth:2, fill:true,
+      pointRadius:3, pointHoverRadius:5, pointBackgroundColor:cv('--s1'), tension:.3}]},
+    options:baseOpts({plugins:{legend:{display:false},
+      tooltip:{backgroundColor:cv('--card2'),titleColor:cv('--text'),bodyColor:cv('--tick'),borderColor:cv('--border2'),borderWidth:1,padding:10,cornerRadius:8,
+        callbacks:{label:x=>' '+fmtAED(x.parsed.y)}},
+    }, interaction:{mode:'index',intersect:false},
+    scales:{x:{grid:{color:'transparent'},ticks:{color:cv('--tick')},border:{color:cv('--border')}},
+      y:{grid:{color:cv('--grid')},ticks:{color:cv('--tick'),callback:v=>fmtAEDc(v).replace('AED ','')},border:{display:false},beginAtZero:true}}})});
+  mkChart('ch-appr', donutCfg(['Approved','Pending'],[st.approved,st.pending],[cv('--ok'),cv('--warn')]));
+  const keys=monthlyKeys(S.gfData);
+  const appM=groupSum(S.gfData.filter(r=>r.status==='Approved'), r=>monthKey(r.reportDate), ()=>1);
+  const penM=groupSum(S.gfData.filter(r=>r.status==='Pending'), r=>monthKey(r.reportDate), ()=>1);
+  mkChart('ch-vol',{type:'bar',
+    data:{labels:keys.map(monthLabel), datasets:[
+      {label:'Approved', data:keys.map(k=>appM.get(k)||0), backgroundColor:cv('--ok'),
+        borderColor:cv('--card'), borderWidth:{top:0,left:1,right:1,bottom:0}, borderRadius:{topLeft:4,topRight:4}, barPercentage:.55, maxBarThickness:64, stack:'s'},
+      {label:'Pending', data:keys.map(k=>penM.get(k)||0), backgroundColor:cv('--warn'),
+        borderColor:cv('--card'), borderWidth:{top:2,left:1,right:1,bottom:0}, barPercentage:.55, maxBarThickness:64, stack:'s'},
+    ]},
+    options:baseOpts({scales:{x:{stacked:true,grid:{color:'transparent'},ticks:{color:cv('--tick')},border:{color:cv('--border')}},
+      y:{stacked:true,grid:{color:cv('--grid')},ticks:{color:cv('--tick'),precision:0},border:{display:false},beginAtZero:true}}})});
+  const bm=[...groupSum(S.gfData, r=>r.brand||'(No brand)', r=>r.value).entries()].sort((a,b)=>b[1]-a[1]);
+  const top=bm.slice(0,6), other=bm.slice(6).reduce((a,[,v])=>a+v,0);
+  const labels=top.map(x=>x[0]).concat(other>0?['Other']:[]);
+  const vals=top.map(x=>x[1]).concat(other>0?[other]:[]);
+  mkChart('ch-brand', donutCfg(labels, vals, SERIES().slice(0,labels.length), 'aed'));
+}
+
+/* ================= QUOTATION — QUOTATIONS TABLE ================= */
+function qQuotations(c){
+  renderDataTable(c,[
+    {k:'quoteId',t:'Quote ID'},{k:'customer',t:'Customer'},{k:'scope',t:'Scope'},
+    {k:'brand',t:'Brand'},{k:'quotationType',t:'Quotation Type'},{k:'model',t:'Model'},
+    {k:'remarks',t:'Remarks'},{k:'value',t:'Value (AED)',num:true,fmt:v=>fmtInt(v)},
+    {k:'emirate',t:'Emirate'},{k:'contact',t:esc(S.userLabel)},{k:'contactNumber',t:'Contact Number'},
+    {k:'status',t:'Status',fmt:pillStatus},{k:'approvedDate',t:'Approved Date'},
+  ], S.gfData, {what:'quotations'});
+}
+
+/* ================= QUOTATION — CUSTOMERS ================= */
+function aggBy(rows, keyField){
+  const m=new Map();
+  rows.forEach(r=>{
+    const k=r[keyField]||'(Blank)';
+    if(!m.has(k)) m.set(k,{key:k,n:0,value:0,approved:0,pending:0,trucks:0});
+    const a=m.get(k); a.n++; a.value+=r.value||0; a.trucks+=r.trucks||0;
+    if(S.mode==='quotation'){ r.status==='Approved'?a.approved++:a.pending++; }
+    else { r.isApproved?a.approved++:a.pending++; }
+  });
+  return [...m.values()];
+}
+function qCustomers(c){
+  const rows=aggBy(S.gfData,'customer').sort((a,b)=>b.value-a.value)
+    .map((a,i)=>({rank:i+1, customer:a.key, n:a.n, value:a.value, approved:a.approved,
+      apct:pct(a.approved,a.n), pending:a.pending, ppct:pct(a.pending,a.n)}));
+  renderDataTable(c,[
+    {k:'rank',t:'#',num:true},{k:'customer',t:'Customer'},{k:'n',t:'Quotes',num:true},
+    {k:'value',t:'Value (AED)',num:true,fmt:v=>fmtInt(v)},
+    {k:'approved',t:'Approved',num:true},{k:'apct',t:'Approved %',num:true,fmt:v=>`<span class="pill pill-ok">${v}%</span>`},
+    {k:'pending',t:'Pending',num:true},{k:'ppct',t:'Pending %',num:true,fmt:v=>`<span class="pill pill-warn">${v}%</span>`},
+  ], rows, {what:'customers'});
+}
+
+/* ================= QUOTATION — REGIONS ================= */
+function qRegions(c){
+  const agg=aggBy(S.gfData,'emirate').sort((a,b)=>b.value-a.value);
+  c.innerHTML=`<div class="charts-grid">`+
+    chartCard('ch-reg-val','Value by Emirate','Total quotation value per region',7)+
+    chartCard('ch-reg-share','Quote Share','Quotation count by emirate',5)+
+    `</div><div id="reg-tbl"></div>`;
+  mkChart('ch-reg-val',{type:'bar',
+    data:{labels:agg.map(a=>a.key), datasets:[{label:'Value', data:agg.map(a=>a.value),
+      backgroundColor:cv('--s1'), borderRadius:{topLeft:4,topRight:4}, barPercentage:.55, maxBarThickness:64}]},
+    options:baseOpts({plugins:{legend:{display:false},
+      tooltip:{backgroundColor:cv('--card2'),titleColor:cv('--text'),bodyColor:cv('--tick'),borderColor:cv('--border2'),borderWidth:1,padding:10,cornerRadius:8,
+        callbacks:{label:x=>' '+fmtAED(x.parsed.y)}}},
+      scales:{x:{grid:{color:'transparent'},ticks:{color:cv('--tick')},border:{color:cv('--border')}},
+        y:{grid:{color:cv('--grid')},ticks:{color:cv('--tick'),callback:v=>fmtAEDc(v).replace('AED ','')},border:{display:false},beginAtZero:true}}})});
+  mkChart('ch-reg-share', donutCfg(agg.map(a=>a.key), agg.map(a=>a.n), SERIES().slice(0,agg.length)));
+  const rows=agg.map((a,i)=>({rank:i+1, emirate:a.key, n:a.n, value:a.value,
+    approved:a.approved, apct:pct(a.approved,a.n), avg:a.n?Math.round(a.value/a.n):0}));
+  renderDataTable($('reg-tbl'),[
+    {k:'rank',t:'#',num:true},{k:'emirate',t:'Emirate'},{k:'n',t:'Quotes',num:true},
+    {k:'value',t:'Value (AED)',num:true,fmt:v=>fmtInt(v)},{k:'avg',t:'Avg Value',num:true,fmt:v=>fmtInt(v)},
+    {k:'approved',t:'Approved',num:true},{k:'apct',t:'Conversion %',num:true,fmt:v=>`<span class="pill pill-ok">${v}%</span>`},
+  ], rows, {search:false});
+}
+
+/* ================= QUOTATION — BRANDS ================= */
+function qBrands(c){
+  const agg=aggBy(S.gfData,'brand').sort((a,b)=>b.value-a.value);
+  c.innerHTML=`<div class="charts-grid">`+chartCard('ch-brand-val','Brand Performance','Quotation value by brand',12)+`</div><div id="brand-tbl"></div>`;
+  const top=agg.slice(0,12);
+  mkChart('ch-brand-val',{type:'bar',
+    data:{labels:top.map(a=>a.key), datasets:[{label:'Value', data:top.map(a=>a.value),
+      backgroundColor:cv('--s2'), borderRadius:{topLeft:4,topRight:4}, barPercentage:.55, maxBarThickness:64}]},
+    options:baseOpts({plugins:{legend:{display:false},
+      tooltip:{backgroundColor:cv('--card2'),titleColor:cv('--text'),bodyColor:cv('--tick'),borderColor:cv('--border2'),borderWidth:1,padding:10,cornerRadius:8,
+        callbacks:{label:x=>' '+fmtAED(x.parsed.y)}}},
+      scales:{x:{grid:{color:'transparent'},ticks:{color:cv('--tick')},border:{color:cv('--border')}},
+        y:{grid:{color:cv('--grid')},ticks:{color:cv('--tick'),callback:v=>fmtAEDc(v).replace('AED ','')},border:{display:false},beginAtZero:true}}})});
+  const rows=agg.map((a,i)=>({rank:i+1, brand:a.key, n:a.n, value:a.value,
+    avg:a.n?Math.round(a.value/a.n):0, approved:a.approved, apct:pct(a.approved,a.n)}));
+  renderDataTable($('brand-tbl'),[
+    {k:'rank',t:'#',num:true},{k:'brand',t:'Brand'},{k:'n',t:'Quotes',num:true},
+    {k:'value',t:'Value (AED)',num:true,fmt:v=>fmtInt(v)},{k:'avg',t:'Avg Value',num:true,fmt:v=>fmtInt(v)},
+    {k:'approved',t:'Approved',num:true},{k:'apct',t:'Conversion %',num:true,fmt:v=>`<span class="pill pill-ok">${v}%</span>`},
+  ], rows, {search:false});
+}
+
+/* ================= QUOTATION — ANALYTICS ================= */
+function qAnalytics(c){
+  const st=qStats(S.gfData);
+  const ms=monthlySeries(S.gfData, r=>r.value);
+  let peakI=-1, peakV=-1; ms.values.forEach((v,i)=>{ if(v>peakV){peakV=v;peakI=i;} });
+  const custAgg=aggBy(S.gfData,'customer').sort((a,b)=>b.value-a.value);
+  const avgDeal=st.total?st.value/st.total:0;
+  c.innerHTML=
+    `<div class="insight-grid">
+      <div class="insight"><div class="t">Top Customer</div><div class="v">${esc(custAgg[0]?.key||'—')}</div>
+        <div class="d">${custAgg[0]?fmtAEDc(custAgg[0].value)+' across '+custAgg[0].n+' quotes':''}</div></div>
+      <div class="insight i-ok"><div class="t">Peak Revenue Month</div><div class="v">${peakI>=0?ms.labels[peakI]:'—'}</div>
+        <div class="d">${peakI>=0?fmtAEDc(peakV)+' quoted':''}</div></div>
+      <div class="insight"><div class="t">Avg Deal Size</div><div class="v">${fmtAEDc(avgDeal)}</div>
+        <div class="d">across ${fmtInt(st.total)} quotations</div></div>
+      <div class="insight ${st.convRate>=50?'i-ok':'i-warn'}"><div class="t">Conversion Rate</div><div class="v">${st.convRate}%</div>
+        <div class="d">${fmtInt(st.approved)} approved · ${fmtInt(st.pending)} pending (${st.pendRate}%)</div></div>
+    </div>
+    <div class="charts-grid">`+
+      chartCard('ch-an-val','Monthly Value','Quotation value (AED) per month',6,'short')+
+      chartCard('ch-an-vol','Monthly Volume','Quotation count per month — paired with value at left',6,'short')+
+      chartCard('ch-conv','Conversion Rate Trend','Approved % and Pending % of quotations per month',7)+
+      chartCard('ch-resp','Response Time Distribution','Days between enquiry and quotation sent',5)+
+    `</div>`;
+  const keys=ms.keys;
+  const cntM=groupSum(S.gfData, r=>monthKey(r.reportDate), ()=>1);
+  mkChart('ch-an-val',{type:'bar',
+    data:{labels:ms.labels, datasets:[{label:'Value', data:ms.values, backgroundColor:cv('--s1'),
+      borderRadius:{topLeft:4,topRight:4}, barPercentage:.55, maxBarThickness:64}]},
+    options:baseOpts({plugins:{legend:{display:false},
+      tooltip:{backgroundColor:cv('--card2'),titleColor:cv('--text'),bodyColor:cv('--tick'),borderColor:cv('--border2'),borderWidth:1,padding:10,cornerRadius:8,
+        callbacks:{label:x=>' '+fmtAED(x.parsed.y)}}},
+      scales:{x:{grid:{color:'transparent'},ticks:{color:cv('--tick')},border:{color:cv('--border')}},
+        y:{grid:{color:cv('--grid')},ticks:{color:cv('--tick'),callback:v=>fmtAEDc(v).replace('AED ','')},border:{display:false},beginAtZero:true}}})});
+  mkChart('ch-an-vol',{type:'bar',
+    data:{labels:keys.map(monthLabel), datasets:[{label:'Quotes', data:keys.map(k=>cntM.get(k)||0),
+      backgroundColor:cv('--s2'), borderRadius:{topLeft:4,topRight:4}, barPercentage:.55, maxBarThickness:64}]},
+    options:baseOpts({plugins:{legend:{display:false}},
+      scales:{x:{grid:{color:'transparent'},ticks:{color:cv('--tick')},border:{color:cv('--border')}},
+        y:{grid:{color:cv('--grid')},ticks:{color:cv('--tick'),precision:0},border:{display:false},beginAtZero:true}}})});
+  const appM=groupSum(S.gfData.filter(r=>r.status==='Approved'), r=>monthKey(r.reportDate), ()=>1);
+  const convData=keys.map(k=>pct(appM.get(k)||0, cntM.get(k)||0));
+  mkChart('ch-conv',{type:'line',
+    data:{labels:keys.map(monthLabel), datasets:[
+      {label:'Approved %', data:convData, borderColor:cv('--ok'), backgroundColor:cv('--ok'),
+        borderWidth:2, pointRadius:3, pointHoverRadius:5, tension:.3},
+      {label:'Pending %', data:convData.map(v=>Math.round((100-v)*10)/10), borderColor:cv('--warn'), backgroundColor:cv('--warn'),
+        borderWidth:2, pointRadius:3, pointHoverRadius:5, tension:.3},
+    ]},
+    options:baseOpts({interaction:{mode:'index',intersect:false},
+      scales:{x:{grid:{color:'transparent'},ticks:{color:cv('--tick')},border:{color:cv('--border')}},
+        y:{grid:{color:cv('--grid')},ticks:{color:cv('--tick'),callback:v=>v+'%'},border:{display:false},min:0,max:100}}})});
+  const buckets=[['Same day',0,0],['1–2 d',1,2],['3–7 d',3,7],['8–14 d',8,14],['15–30 d',15,30],['30+ d',31,Infinity]];
+  const resp=S.gfData.filter(r=>r.daysInterval!=null);
+  const respData=buckets.map(([,lo,hi])=>resp.filter(r=>r.daysInterval>=lo&&r.daysInterval<=hi).length);
+  mkChart('ch-resp',{type:'bar',
+    data:{labels:buckets.map(b=>b[0]), datasets:[{label:'Quotes', data:respData,
+      backgroundColor:cv('--s4'), borderRadius:{topLeft:4,topRight:4}, barPercentage:.55, maxBarThickness:64}]},
+    options:baseOpts({plugins:{legend:{display:false}},
+      scales:{x:{grid:{color:'transparent'},ticks:{color:cv('--tick')},border:{color:cv('--border')}},
+        y:{grid:{color:cv('--grid')},ticks:{color:cv('--tick'),precision:0},border:{display:false},beginAtZero:true}}})});
+}
+</script>
+<script>
+/* ================================================================
+   PMC — OVERVIEW
+   ================================================================ */
+function pStats(rows){
+  const total=rows.length;
+  const nw=rows.filter(r=>/new/i.test(r.customerType)).length;
+  const ex=rows.filter(r=>/exist/i.test(r.customerType)).length;
+  const act=rows.filter(r=>r.contractStatus==='Active').length;
+  const exp=rows.filter(r=>r.contractStatus==='Expired').length;
+  const trucks=rows.reduce((a,r)=>a+r.trucks,0);
+  const value=rows.reduce((a,r)=>a+r.value,0);
+  const approved=rows.filter(r=>r.isApproved).length;
+  return {total, nw, ex, act, exp, trucks, value, approved,
+    convRate:pct(approved,total)};
+}
+function pOverview(c){
+  const st=pStats(S.gfData);
+  c.innerHTML=
+    kpiHTML([
+      {l:'Total Contracts', v:fmtInt(st.total), s:'PMC contracts in view'},
+      {l:'New Customers', v:fmtInt(st.nw), s:`<b>${pct(st.nw,st.total)}%</b> of contracts`, cls:'k-acc'},
+      {l:'Existing Customers', v:fmtInt(st.ex), s:`<b>${pct(st.ex,st.total)}%</b> of contracts`},
+      {l:'Active Contracts', v:fmtInt(st.act), s:`<b>${pct(st.act,st.total)}%</b> active`, cls:'k-ok'},
+      {l:'Expired Contracts', v:fmtInt(st.exp), s:`<b>${pct(st.exp,st.total)}%</b> expired`, cls:'k-bad'},
+      {l:'Total Trucks', v:fmtInt(st.trucks), s:'under maintenance contracts'},
+      {l:'Total Contract Value', v:st.value?fmtAEDc(st.value):'—', s:st.value?fmtAED(st.value):'no value column in file', cls:'k-acc'},
+    ],150)+
+    `<div class="charts-grid">`+
+      chartCard('ch-ptrend','PMC Contracts Trend','Contracts per month (approved / created date)',8)+
+      chartCard('ch-pappr','Approval Rate','Approved vs not approved contracts',4)+
+      chartCard('ch-pvol','Monthly Volume','Approved vs not approved per month',7)+
+      chartCard('ch-pdur','Contract Duration','Contracts by years offered',5)+
+    `</div>`;
+  const ms=monthlySeries(S.gfData, ()=>1);
+  mkChart('ch-ptrend',{type:'line',
+    data:{labels:ms.labels, datasets:[{label:'Contracts', data:ms.values,
+      borderColor:cv('--s1'), backgroundColor:cv('--s1')+'22', borderWidth:2, fill:true,
+      pointRadius:3, pointHoverRadius:5, pointBackgroundColor:cv('--s1'), tension:.3}]},
+    options:baseOpts({plugins:{legend:{display:false}}, interaction:{mode:'index',intersect:false},
+      scales:{x:{grid:{color:'transparent'},ticks:{color:cv('--tick')},border:{color:cv('--border')}},
+        y:{grid:{color:cv('--grid')},ticks:{color:cv('--tick'),precision:0},border:{display:false},beginAtZero:true}}})});
+  mkChart('ch-pappr', donutCfg(['Approved','Not Approved'],[st.approved, st.total-st.approved],[cv('--ok'),cv('--warn')]));
+  const keys=monthlyKeys(S.gfData);
+  const aM=groupSum(S.gfData.filter(r=>r.isApproved), r=>monthKey(r.reportDate), ()=>1);
+  const nM=groupSum(S.gfData.filter(r=>!r.isApproved), r=>monthKey(r.reportDate), ()=>1);
+  mkChart('ch-pvol',{type:'bar',
+    data:{labels:keys.map(monthLabel), datasets:[
+      {label:'Approved', data:keys.map(k=>aM.get(k)||0), backgroundColor:cv('--ok'),
+        borderColor:cv('--card'), borderRadius:{topLeft:4,topRight:4}, barPercentage:.55, maxBarThickness:64, stack:'s'},
+      {label:'Not Approved', data:keys.map(k=>nM.get(k)||0), backgroundColor:cv('--warn'),
+        borderColor:cv('--card'), borderWidth:{top:2}, barPercentage:.55, maxBarThickness:64, stack:'s'},
+    ]},
+    options:baseOpts({scales:{x:{stacked:true,grid:{color:'transparent'},ticks:{color:cv('--tick')},border:{color:cv('--border')}},
+      y:{stacked:true,grid:{color:cv('--grid')},ticks:{color:cv('--tick'),precision:0},border:{display:false},beginAtZero:true}}})});
+  const dur=[...groupSum(S.gfData, r=>r.years||0, ()=>1).entries()].sort((a,b)=>a[0]-b[0]);
+  mkChart('ch-pdur',{type:'bar',
+    data:{labels:dur.map(([y])=>y?y+' yr':'N/A'), datasets:[{label:'Contracts', data:dur.map(([,n])=>n),
+      backgroundColor:cv('--s2'), borderRadius:{topLeft:4,topRight:4}, barPercentage:.55, maxBarThickness:64}]},
+    options:baseOpts({plugins:{legend:{display:false}},
+      scales:{x:{grid:{color:'transparent'},ticks:{color:cv('--tick')},border:{color:cv('--border')}},
+        y:{grid:{color:cv('--grid')},ticks:{color:cv('--tick'),precision:0},border:{display:false},beginAtZero:true}}})});
+}
+
+/* ================= PMC — CONTRACTS TABLE ================= */
+function pContracts(c){
+  renderDataTable(c,[
+    {k:'sr',t:'Sr.',num:true,fmt:(v,r,i)=>String(i+1)},
+    {k:'department',t:'Department'},{k:'customer',t:'Customer Name'},
+    {k:'customerType',t:'Customer Type',fmt:v=>/new/i.test(v)?`<span class="pill pill-ok">New</span>`:v?`<span class="pill pill-mut">${esc(v)}</span>`:'—'},
+    {k:'contractNumber',t:'PMC Contract No.'},{k:'location',t:'Location'},
+    {k:'contractStatus',t:'Contract Status',fmt:pillContract},
+    {k:'approvedBy',t:'Approved By'},{k:'approvedDate',t:'Approved Date'},{k:'expiryDate',t:'Expiry Date'},
+    {k:'value',t:'Contract Value (AED)',num:true,fmt:v=>v?fmtInt(v):'—'},
+    {k:'trucks',t:'No. of Trucks',num:true},
+    {k:'remarks',t:'Remarks'},{k:'createdBy',t:'Created By'},
+    {k:'createdTime',t:'Created Time',fmt:v=>esc(fmtDateTime(v))},
+    {k:'brand',t:'Brand'},{k:'years',t:'Years Offered',num:true},
+  ], S.gfData, {what:'contracts'});
+}
+
+/* ================= PMC — CUSTOMERS ================= */
+function pCustomers(c){
+  const rows=aggBy(S.gfData,'customer').sort((a,b)=>b.n-a.n)
+    .map((a,i)=>({rank:i+1, customer:a.key, n:a.n, trucks:a.trucks, value:a.value,
+      approved:a.approved, conv:pct(a.approved,a.n)}));
+  renderDataTable(c,[
+    {k:'rank',t:'#',num:true},{k:'customer',t:'Customer'},{k:'n',t:'Contracts',num:true},
+    {k:'trucks',t:'Trucks',num:true},{k:'value',t:'Value (AED)',num:true,fmt:v=>v?fmtInt(v):'—'},
+    {k:'approved',t:'Approved',num:true},
+    {k:'conv',t:'Conversion %',num:true,fmt:v=>`<span class="pill pill-ok">${v}%</span>`},
+  ], rows, {what:'customers'});
+}
+
+/* ================= PMC — ANALYTICS ================= */
+function pAnalytics(c){
+  const st=pStats(S.gfData);
+  const ms=monthlySeries(S.gfData, ()=>1);
+  let peakI=-1,peakV=-1; ms.values.forEach((v,i)=>{ if(v>peakV){peakV=v;peakI=i;} });
+  const keys=ms.keys;
+  const aM=groupSum(S.gfData.filter(r=>r.isApproved), r=>monthKey(r.reportDate), ()=>1);
+  const cM=groupSum(S.gfData, r=>monthKey(r.reportDate), ()=>1);
+  let bestI=-1,bestV=-1; keys.forEach((k,i)=>{ const p=pct(aM.get(k)||0,cM.get(k)||0); if(p>bestV && (cM.get(k)||0)>0){bestV=p;bestI=i;} });
+  const soon=new Date(); soon.setDate(soon.getDate()+90);
+  const expiring=S.gfData.filter(r=>r.contractStatus==='Active' && r.expiryDate && r.expiryDate<=soon).length;
+  const avgTr=st.total?st.trucks/st.total:0;
+  c.innerHTML=
+    `<div class="insight-grid">
+      <div class="insight"><div class="t">Peak Volume Month</div><div class="v">${peakI>=0?ms.labels[peakI]:'—'}</div>
+        <div class="d">${peakI>=0?fmtInt(peakV)+' contracts':''}</div></div>
+      <div class="insight i-ok"><div class="t">Best Approval Month</div><div class="v">${bestI>=0?monthLabel(keys[bestI]):'—'}</div>
+        <div class="d">${bestI>=0?bestV+'% approved':''}</div></div>
+      <div class="insight"><div class="t">Avg Trucks / Contract</div><div class="v">${avgTr.toFixed(1)}</div>
+        <div class="d">${fmtInt(st.trucks)} trucks in ${fmtInt(st.total)} contracts</div></div>
+      <div class="insight ${expiring?'i-warn':'i-ok'}"><div class="t">Expiring ≤ 90 Days</div><div class="v">${fmtInt(expiring)}</div>
+        <div class="d">active contracts nearing expiry</div></div>
+    </div>
+    <div class="charts-grid">`+
+      chartCard('ch-ptr-dist','Trucks Distribution','Contracts by fleet size',5)+
+      chartCard('ch-pconv','Conversion Trend','Approval % of contracts per month',7)+
+      chartCard('ch-ptpc','Trucks per Contract','Average trucks per contract by month',12,'short')+
+    `</div>`;
+  const buckets=[['1 truck',1,1],['2 trucks',2,2],['3–5',3,5],['6–10',6,10],['11+',11,Infinity]];
+  mkChart('ch-ptr-dist',{type:'bar',
+    data:{labels:buckets.map(b=>b[0]), datasets:[{label:'Contracts',
+      data:buckets.map(([,lo,hi])=>S.gfData.filter(r=>r.trucks>=lo&&r.trucks<=hi).length),
+      backgroundColor:cv('--s4'), borderRadius:{topLeft:4,topRight:4}, barPercentage:.55, maxBarThickness:64}]},
+    options:baseOpts({plugins:{legend:{display:false}},
+      scales:{x:{grid:{color:'transparent'},ticks:{color:cv('--tick')},border:{color:cv('--border')}},
+        y:{grid:{color:cv('--grid')},ticks:{color:cv('--tick'),precision:0},border:{display:false},beginAtZero:true}}})});
+  mkChart('ch-pconv',{type:'line',
+    data:{labels:keys.map(monthLabel), datasets:[{label:'Approved %',
+      data:keys.map(k=>pct(aM.get(k)||0,cM.get(k)||0)),
+      borderColor:cv('--ok'), backgroundColor:cv('--ok'), borderWidth:2, pointRadius:3, pointHoverRadius:5, tension:.3}]},
+    options:baseOpts({plugins:{legend:{display:false}}, interaction:{mode:'index',intersect:false},
+      scales:{x:{grid:{color:'transparent'},ticks:{color:cv('--tick')},border:{color:cv('--border')}},
+        y:{grid:{color:cv('--grid')},ticks:{color:cv('--tick'),callback:v=>v+'%'},border:{display:false},min:0,max:100}}})});
+  const tM=groupSum(S.gfData, r=>monthKey(r.reportDate), r=>r.trucks);
+  mkChart('ch-ptpc',{type:'bar',
+    data:{labels:keys.map(monthLabel), datasets:[{label:'Avg trucks',
+      data:keys.map(k=>cM.get(k)?Math.round((tM.get(k)||0)/cM.get(k)*10)/10:0),
+      backgroundColor:cv('--s2'), borderRadius:{topLeft:4,topRight:4}, barPercentage:.55, maxBarThickness:64}]},
+    options:baseOpts({plugins:{legend:{display:false}},
+      scales:{x:{grid:{color:'transparent'},ticks:{color:cv('--tick')},border:{color:cv('--border')}},
+        y:{grid:{color:cv('--grid')},ticks:{color:cv('--tick')},border:{display:false},beginAtZero:true}}})});
+}
+
+/* ================================================================
+   EXPORT
+   ================================================================ */
+$('btn-export').addEventListener('click', ()=>{
+  $('export-opts').innerHTML=[
+    ['excel','📗','Excel Workbook','Multi-sheet report — KPIs, data, breakdowns, monthly trend'],
+    ['csv','📄','CSV (Filtered)','Current filtered records as a flat CSV file'],
+    ['png','🖼️','Dashboard Image','PNG screenshot of the current dashboard view'],
+    ['pbi','⚡','Power BI Fact Table','Clean typed CSV ready for Power BI ingestion'],
+  ].map(([k,ic,t,d])=>`<div class="export-opt" data-ex="${k}"><div class="ic">${ic}</div>
+    <div><div class="t">${t}</div><div class="d">${d}</div></div></div>`).join('');
+  document.querySelectorAll('[data-ex]').forEach(el=>el.addEventListener('click', ()=>{
+    closeModal('m-export'); runExport(el.dataset.ex);
+  }));
+  openModal('m-export');
+});
+function dlBlob(blob, name){
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 800);
+}
+function stamp(){ return new Date().toISOString().slice(0,10); }
+function runExport(kind){
+  overlay('Preparing export…');
+  setTimeout(async ()=>{
+    try{
+      if(kind==='excel') exportExcel();
+      else if(kind==='csv') exportCSV(false);
+      else if(kind==='pbi') exportCSV(true);
+      else if(kind==='png') await exportPNG();
+      toast('Export ready','ok');
+    }catch(e){ console.error(e); toast('Export failed: '+e.message,'bad'); }
+    overlay(false);
+  }, 60);
+}
+function aoaSheet(wb, name, aoa){ XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), name.slice(0,31)); }
+function exportExcel(){
+  const wb=XLSX.utils.book_new();
+  if(S.mode==='quotation'){
+    const st=qStats(S.gfData);
+    aoaSheet(wb,'Dashboard KPIs',[
+      ['QuotePro — Quotation Dashboard KPIs'],['Generated',new Date().toLocaleString()],[],
+      ['KPI','Value'],
+      ['Total Quotations',st.total],['Unique Customers',st.customers],
+      ['Total Value (AED)',st.value],['Approved',st.approved],['Conversion %',st.convRate],
+      ['Pending',st.pending],['Pending Rate %',st.pendRate],['Avg Response (days)',+st.avgResp.toFixed(1)],
+    ]);
+    aoaSheet(wb,'Quotation Data',[
+      ['Quote ID','Customer','Emirate','Scope of Work','Brand','Model','Quotation Type','Value (AED)',S.userLabel,'Contact Number','Sent Date','Approved Date','Enquiry Date','Days Interval','Status','Remarks'],
+      ...S.gfData.map(r=>[r.quoteId,r.customer,r.emirate,r.scope,r.brand,r.model,r.quotationType,r.value,
+        r.contact,r.contactNumber,isoDate(r.sentDate),isoDate(r.approvedDate),isoDate(r.enquiryDate),r.daysInterval??'',r.status,r.remarks])]);
+    const cust=aggBy(S.gfData,'customer').sort((a,b)=>b.value-a.value);
+    aoaSheet(wb,'Customers',[['#','Customer','Quotes','Value (AED)','Approved','Approved %','Pending','Pending %'],
+      ...cust.map((a,i)=>[i+1,a.key,a.n,a.value,a.approved,pct(a.approved,a.n),a.pending,pct(a.pending,a.n)])]);
+    const reg=aggBy(S.gfData,'emirate').sort((a,b)=>b.value-a.value);
+    aoaSheet(wb,'Regions',[['Emirate','Quotes','Value (AED)','Approved','Conversion %'],
+      ...reg.map(a=>[a.key,a.n,a.value,a.approved,pct(a.approved,a.n)])]);
+    const br=aggBy(S.gfData,'brand').sort((a,b)=>b.value-a.value);
+    aoaSheet(wb,'Brands',[['Brand','Quotes','Value (AED)','Approved','Conversion %'],
+      ...br.map(a=>[a.key,a.n,a.value,a.approved,pct(a.approved,a.n)])]);
+    const keys=monthlyKeys(S.gfData);
+    const vM=groupSum(S.gfData,r=>monthKey(r.reportDate),r=>r.value), cM=groupSum(S.gfData,r=>monthKey(r.reportDate),()=>1),
+      aM=groupSum(S.gfData.filter(r=>r.status==='Approved'),r=>monthKey(r.reportDate),()=>1);
+    aoaSheet(wb,'Monthly Trend',[['Month','Quotes','Value (AED)','Approved','Approved %'],
+      ...keys.map(k=>[monthLabel(k),cM.get(k)||0,vM.get(k)||0,aM.get(k)||0,pct(aM.get(k)||0,cM.get(k)||0)])]);
+    const us=aggBy(S.gfData,'contact').sort((a,b)=>b.value-a.value);
+    aoaSheet(wb,'Sales Users',[[S.userLabel,'Quotes','Value (AED)','Approved','Conversion %'],
+      ...us.map(a=>[a.key,a.n,a.value,a.approved,pct(a.approved,a.n)])]);
+    XLSX.writeFile(wb,`QuotePro_Quotation_Report_${stamp()}.xlsx`);
+  }else{
+    const st=pStats(S.gfData);
+    aoaSheet(wb,'KPIs',[
+      ['QuotePro — PMC Dashboard KPIs'],['Generated',new Date().toLocaleString()],[],
+      ['KPI','Value'],
+      ['Total Contracts',st.total],['New Customers',st.nw],['Existing Customers',st.ex],
+      ['Active Contracts',st.act],['Expired Contracts',st.exp],
+      ['Total Trucks',st.trucks],['Total Contract Value (AED)',st.value],
+      ['Approved',st.approved],['Conversion %',st.convRate],
+    ]);
+    const keys=monthlyKeys(S.gfData);
+    const cM=groupSum(S.gfData,r=>monthKey(r.reportDate),()=>1),
+      aM=groupSum(S.gfData.filter(r=>r.isApproved),r=>monthKey(r.reportDate),()=>1),
+      tM=groupSum(S.gfData,r=>monthKey(r.reportDate),r=>r.trucks);
+    aoaSheet(wb,'Monthly',[['Month','Contracts','Approved','Approved %','Trucks'],
+      ...keys.map(k=>[monthLabel(k),cM.get(k)||0,aM.get(k)||0,pct(aM.get(k)||0,cM.get(k)||0),tM.get(k)||0])]);
+    const cust=aggBy(S.gfData,'customer').sort((a,b)=>b.n-a.n);
+    aoaSheet(wb,'Top Customers',[['#','Customer','Contracts','Trucks','Value (AED)','Approved','Conversion %'],
+      ...cust.map((a,i)=>[i+1,a.key,a.n,a.trucks,a.value,a.approved,pct(a.approved,a.n)])]);
+    aoaSheet(wb,'PMC Data',[
+      ['Sr.','Department','Customer Name','Customer Type','PMC Contract No.','Location','Contract Status','Approval Status','Approved By','Approved Date','Expiry Date','Contract Value (AED)','No. of Trucks','Remarks','Created By','Created Time','Brand','Years Offered'],
+      ...S.gfData.map((r,i)=>[i+1,r.department,r.customer,r.customerType,r.contractNumber,r.location,
+        r.contractStatus,r.status,r.approvedBy,isoDate(r.approvedDate),isoDate(r.expiryDate),
+        r.value,r.trucks,r.remarks,r.createdBy,r.createdTime?r.createdTime.toISOString().replace('T',' ').slice(0,16):'',r.brand,r.years])]);
+    XLSX.writeFile(wb,`QuotePro_PMC_Report_${stamp()}.xlsx`);
+  }
+}
+function csvEsc(v){ v=String(v??''); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
+function exportCSV(powerBI){
+  let head, rows;
+  if(S.mode==='quotation'){
+    head=['QuoteID','Customer','Emirate','ScopeOfWork','Brand','Model','QuotationType','ValueAED','SalesUser','ContactNumber','SentDate','ApprovedDate','EnquiryDate','DaysInterval','Status','ReportDate','ReportYear','ReportMonth','Remarks'];
+    rows=S.gfData.map(r=>[r.quoteId,r.customer,r.emirate,r.scope,r.brand,r.model,r.quotationType,r.value,
+      r.contact,r.contactNumber,isoDate(r.sentDate),isoDate(r.approvedDate),isoDate(r.enquiryDate),
+      r.daysInterval??'',r.status,isoDate(r.reportDate),r.reportDate?r.reportDate.getFullYear():'',
+      r.reportDate?r.reportDate.getMonth()+1:'',r.remarks]);
+  }else{
+    head=['Sr','Department','Customer','CustomerType','ContractNumber','Location','ContractStatus','ApprovalStatus','ApprovedBy','ApprovedDate','ExpiryDate','ContractValueAED','Trucks','Remarks','CreatedBy','CreatedTime','Brand','YearsOffered','ReportDate','ReportYear','ReportMonth'];
+    rows=S.gfData.map((r,i)=>[i+1,r.department,r.customer,r.customerType,r.contractNumber,r.location,
+      r.contractStatus,r.status,r.approvedBy,isoDate(r.approvedDate),isoDate(r.expiryDate),r.value,r.trucks,
+      r.remarks,r.createdBy,r.createdTime?r.createdTime.toISOString():'',r.brand,r.years,
+      isoDate(r.reportDate),r.reportDate?r.reportDate.getFullYear():'',r.reportDate?r.reportDate.getMonth()+1:'']);
+  }
+  const csv=[head,...rows].map(r=>r.map(csvEsc).join(',')).join('\r\n');
+  const base=S.mode==='quotation'?'Quotation':'PMC';
+  dlBlob(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}),
+    `QuotePro_${base}_${powerBI?'PowerBI_Fact':'Filtered'}_${stamp()}.csv`);
+}
+async function exportPNG(){
+  const canvas=await html2canvas($('screen-dash'), {backgroundColor:cv('--bg'), scale:2,
+    ignoreElements:el=>el.classList?.contains('overlay')});
+  await new Promise(res=>canvas.toBlob(b=>{ dlBlob(b,`QuotePro_Dashboard_${stamp()}.png`); res(); },'image/png'));
+}
+
+/* ================================================================
+   USER MANAGEMENT (admin)
+   ================================================================ */
+$('ms-users-btn').addEventListener('click', ()=>{ renderUsers(); openModal('m-users'); });
+function renderUsers(){
+  const users=loadUsers();
+  $('totp-setup').classList.add('hidden'); S.totpPending=null;
+  $('users-list').innerHTML=users.map((u,i)=>`
+    <div class="u-row">
+      <div><div class="un">${esc(u.u)}</div><div class="ur">${u.role}${u.totpOn?' · 🔐 2FA on':''}</div></div>
+      <div class="sp"></div>
+      <button class="btn btn-sm" data-2fa="${i}">${u.totpOn?'Disable 2FA':'Enable 2FA'}</button>
+      ${u.u!==S.user.u?`<button class="btn btn-sm btn-danger" data-del="${i}">Delete</button>`:''}
+    </div>`).join('');
+  document.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click', ()=>{
+    const users=loadUsers(); const u=users[+b.dataset.del];
+    confirmBox('Delete user?',`Remove account "${u.u}" from this browser?`,()=>{
+      users.splice(+b.dataset.del,1); saveUsers(users); renderUsers(); toast('User deleted','ok');
+    });
+  }));
+  document.querySelectorAll('[data-2fa]').forEach(b=>b.addEventListener('click', async ()=>{
+    const users=loadUsers(); const i=+b.dataset['2fa']??+b.getAttribute('data-2fa'); const u=users[i];
+    if(u.totpOn){ u.totp=null; u.totpOn=false; saveUsers(users); renderUsers(); toast('2FA disabled for '+u.u,'ok'); return; }
+    if(!crypto?.subtle){ toast('2FA needs a secure (https) context.','bad'); return; }
+    const secret=genTotpSecret();
+    S.totpPending={idx:i, secret};
+    $('totp-secret-txt').textContent=`Account: ${u.u} · Secret: ${secret}\notpauth://totp/QuotePro:${encodeURIComponent(u.u)}?secret=${secret}&issuer=QuotePro`;
+    $('totp-verify-code').value='';
+    $('totp-setup').classList.remove('hidden');
+  }));
+}
+$('totp-activate').addEventListener('click', async ()=>{
+  if(!S.totpPending) return;
+  if(await verifyTotp(S.totpPending.secret, $('totp-verify-code').value)){
+    const users=loadUsers(); const u=users[S.totpPending.idx];
+    u.totp=S.totpPending.secret; u.totpOn=true; saveUsers(users);
+    toast('2FA activated for '+u.u,'ok'); renderUsers();
+  } else toast('Code did not match — try again.','bad');
+});
+$('nu-add').addEventListener('click', async ()=>{
+  const name=$('nu-name').value.trim(), pass=$('nu-pass').value, role=$('nu-role').value;
+  if(!name || pass.length<6){ toast('Username required; password min 6 chars.','bad'); return; }
+  const users=loadUsers();
+  if(users.some(u=>u.u.toLowerCase()===name.toLowerCase())){ toast('Username already exists.','bad'); return; }
+  users.push({u:name, h:await hashPw(name,pass), role, totp:null, totpOn:false});
+  saveUsers(users); $('nu-name').value=''; $('nu-pass').value='';
+  renderUsers(); toast('User added','ok');
+});
+
+/* ================================================================
+   INIT
+   ================================================================ */
+document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click', e=>{ if(e.target===m) m.classList.add('hidden'); }));
+(async function init(){
+  setTheme(localStorage.getItem(LSK_THEME)||'dark');
+  await seedUsers();
+  showScreen('screen-login');
+})();
+</script>
+</body>
+</html>
