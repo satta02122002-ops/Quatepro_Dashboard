@@ -1574,7 +1574,7 @@ function pOverview(c){
     `<div class="charts-grid">`+
       chartCard('ch-ptrend','PMC Contracts Trend','Contracts per month (approved / created date)',8)+
       chartCard('ch-pappr','Approval Rate','Approved vs not approved contracts',4)+
-      chartCard('ch-pvol','Monthly Volume','Approved vs not approved per month',7)+
+      chartCard('ch-pvol','Monthly Volume','Active vs expired contracts per month',7)+
       chartCard('ch-pdur','Contract Duration','Contracts by years offered',5)+
     `</div>`;
   const ms=monthlySeries(S.gfData, ()=>1);
@@ -1587,13 +1587,13 @@ function pOverview(c){
         y:{grid:{color:cv('--grid')},ticks:{color:cv('--tick'),precision:0},border:{display:false},beginAtZero:true}}})});
   mkChart('ch-pappr', donutCfg(['Approved','Not Approved'],[st.approved, st.total-st.approved],[cv('--ok'),cv('--warn')]));
   const keys=monthlyKeys(S.gfData);
-  const aM=groupSum(S.gfData.filter(r=>r.isApproved), r=>monthKey(r.reportDate), ()=>1);
-  const nM=groupSum(S.gfData.filter(r=>!r.isApproved), r=>monthKey(r.reportDate), ()=>1);
+  const actM=groupSum(S.gfData.filter(r=>r.contractStatus==='Active'), r=>monthKey(r.reportDate), ()=>1);
+  const expM=groupSum(S.gfData.filter(r=>r.contractStatus==='Expired'), r=>monthKey(r.reportDate), ()=>1);
   mkChart('ch-pvol',{type:'bar',
     data:{labels:keys.map(monthLabel), datasets:[
-      {label:'Approved', data:keys.map(k=>aM.get(k)||0), backgroundColor:cv('--ok'),
+      {label:'Active', data:keys.map(k=>actM.get(k)||0), backgroundColor:cv('--ok'),
         borderColor:cv('--card'), borderRadius:{topLeft:4,topRight:4}, barPercentage:.55, maxBarThickness:64, stack:'s'},
-      {label:'Not Approved', data:keys.map(k=>nM.get(k)||0), backgroundColor:cv('--warn'),
+      {label:'Expired', data:keys.map(k=>expM.get(k)||0), backgroundColor:cv('--bad'),
         borderColor:cv('--card'), borderWidth:{top:2}, barPercentage:.55, maxBarThickness:64, stack:'s'},
     ]},
     options:baseOpts({scales:{x:{stacked:true,grid:{color:'transparent'},ticks:{color:cv('--tick')},border:{color:cv('--border')}},
