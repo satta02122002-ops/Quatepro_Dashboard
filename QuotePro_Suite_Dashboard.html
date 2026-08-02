@@ -539,6 +539,13 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 const cv = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 const SERIES = () => [cv('--s1'),cv('--s2'),cv('--s3'),cv('--s4'),cv('--s5'),cv('--s6'),cv('--s7'),cv('--s8')];
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const QUARTERS = [
+  {v:'1',t:'Q1'},
+  {v:'2',t:'Q2'},
+  {v:'3',t:'Q3'},
+  {v:'4',t:'Q4'},
+];
+function quarterOf(d){ return d instanceof Date && !isNaN(d) ? Math.floor(d.getMonth()/3)+1 : null; }
 
 function toast(msg, kind){ const t=document.createElement('div'); t.className='toast '+(kind||''); t.textContent=msg;
   $('toasts').appendChild(t); setTimeout(()=>t.remove(), 3800); }
@@ -1063,6 +1070,7 @@ function uniqVals(field){
 function filterConfig(){
   if(S.mode==='quotation') return [
     {k:'year',label:'Year',opts:()=>uniqYears()},
+    {k:'quarter',label:'Quarter',opts:()=>QUARTERS},
     {k:'month',label:'Month',opts:()=>MONTHS.map((m,i)=>({v:String(i),t:m}))},
     {k:'customer',label:'Customer',opts:()=>uniqVals('customer')},
     {k:'emirate',label:'Emirate',opts:()=>uniqVals('emirate')},
@@ -1075,6 +1083,7 @@ function filterConfig(){
   ];
   return [
     {k:'year',label:'Year',opts:()=>uniqYears()},
+    {k:'quarter',label:'Quarter',opts:()=>QUARTERS},
     {k:'month',label:'Month',opts:()=>MONTHS.map((m,i)=>({v:String(i),t:m}))},
     {k:'department',label:'Department',opts:()=>uniqVals('department')},
     {k:'customer',label:'Customer',opts:()=>uniqVals('customer')},
@@ -1126,6 +1135,7 @@ function applyFilters(){
   S.gfData=S.allData.filter(r=>{
     const d=r.reportDate;
     if(f.year  && (!d || String(d.getFullYear())!==f.year)) return false;
+    if(f.quarter && (!d || quarterOf(d)!==+f.quarter)) return false;
     if(f.month!==undefined && f.month!=='' && (!d || d.getMonth()!==+f.month)) return false;
     if(S.mode==='quotation'){
       if(f.customer && r.customer!==f.customer) return false;
@@ -1160,6 +1170,7 @@ function renderChips(){
     const f=cfg.find(x=>x.k===k); if(!f) return '';
     let disp=v;
     if(k==='month') disp=MONTHS[+v];
+    if(k==='quarter') disp='Q'+v;
     if(f.num) disp='AED '+(+v).toLocaleString();
     return `<span class="chip">${esc(f.label)}: ${esc(disp)} <button data-chip="${k}" title="Remove">✕</button></span>`;
   }).join('');
