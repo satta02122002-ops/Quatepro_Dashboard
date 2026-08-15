@@ -1130,7 +1130,7 @@ function feedbackLabel(v){
   return v==='Happy'?'Happy':v==='Not Happy'?'Not Happy':v||'';
 }
 function fbFaceSVG(kind){
-  // Line-art faces matching the Customer Feedback Overview mock
+  // Line-art faces matching the Customer Feedback mock
   if(kind==='happy') return `<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="27" fill="none" stroke="currentColor" stroke-width="3.5"/><circle cx="22" cy="26" r="3.2" fill="currentColor"/><circle cx="42" cy="26" r="3.2" fill="currentColor"/><path d="M20 37c3.5 9 20.5 9 24 0" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg>`;
   return `<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="27" fill="none" stroke="currentColor" stroke-width="3.5"/><circle cx="22" cy="26" r="3.2" fill="currentColor"/><circle cx="42" cy="26" r="3.2" fill="currentColor"/><path d="M20 44c3.5-9 20.5-9 24 0" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg>`;
 }
@@ -1790,8 +1790,8 @@ function rStats(rows){
 function rOverview(c){
   const st=rStats(S.gfData);
   c.innerHTML=
-    `<div class="fb-overview" aria-label="Customer feedback overview">
-      <div class="fb-overview-title">Customer Feedback Overview</div>
+    `<div class="fb-overview" aria-label="Customer Feedback">
+      <div class="fb-overview-title">Customer Feedback</div>
       <div class="fb-overview-row">
         <div class="fb-side happy">
           <div class="fb-icon">${fbFaceSVG('happy')}</div>
