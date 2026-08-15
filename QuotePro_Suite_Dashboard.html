@@ -219,25 +219,26 @@ table.tbl th.num{text-align:right}
 .insight .v{font-size:16px;font-weight:700}
 .insight .d{font-size:12px;color:var(--muted);margin-top:3px}
 .insight.i-ok{border-left-color:var(--ok)} .insight.i-warn{border-left-color:var(--warn)} .insight.i-bad{border-left-color:var(--bad)}
-/* ================= FEEDBACK MOOD (Repair Overview) ================= */
-.fb-mood-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.fb-mood{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;
-  display:flex;align-items:center;gap:14px;min-width:0}
-.fb-mood.happy{border-color:color-mix(in srgb, var(--ok) 55%, var(--border));background:var(--ok-soft)}
-.fb-mood.sad{border-color:color-mix(in srgb, var(--bad) 55%, var(--border));background:var(--bad-soft)}
-.fb-mood .emo{font-size:28px;line-height:1;flex-shrink:0}
-.fb-mood .fb-body{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
-.fb-mood .lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
-.fb-mood.happy .lbl{color:var(--ok)}
-.fb-mood.sad .lbl{color:var(--bad)}
-.fb-mood .cnt{font-size:22px;font-weight:750;letter-spacing:-.02em;line-height:1.15;font-variant-numeric:tabular-nums}
-.fb-mood.happy .cnt{color:var(--ok)}
-.fb-mood.sad .cnt{color:var(--bad)}
-.fb-mood .sub{font-size:11.5px;color:var(--muted)}
+/* ================= FEEDBACK OVERVIEW (Repair) ================= */
+.fb-overview{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 18px 16px;box-shadow:var(--shadow)}
+.fb-overview-title{text-align:center;font-size:12px;font-weight:750;letter-spacing:.08em;text-transform:uppercase;color:var(--text);margin-bottom:12px}
+.fb-overview-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px}
+.fb-divider{width:1px;align-self:stretch;background:var(--border);min-height:56px}
+.fb-side{display:flex;align-items:center;justify-content:center;gap:14px;padding:4px 10px;min-width:0}
+.fb-side .fb-icon{width:48px;height:48px;flex-shrink:0}
+.fb-side .fb-icon svg{width:100%;height:100%;display:block}
+.fb-side.happy .fb-icon{color:var(--ok)}
+.fb-side.sad .fb-icon{color:var(--bad)}
+.fb-side .fb-meta{display:flex;flex-direction:column;gap:1px;min-width:0}
+.fb-side .cnt{font-size:28px;font-weight:750;letter-spacing:-.03em;line-height:1.1;font-variant-numeric:tabular-nums}
+.fb-side.happy .cnt{color:var(--ok)}
+.fb-side.sad .cnt{color:var(--bad)}
+.fb-side .lbl{font-size:12px;font-weight:750;letter-spacing:.06em;text-transform:uppercase;color:var(--text)}
 @media(max-width:760px){
-  .fb-mood-grid{grid-template-columns:1fr}
-  .fb-mood .emo{font-size:24px}
-  .fb-mood .cnt{font-size:20px}
+  .fb-overview-row{grid-template-columns:1fr;gap:12px}
+  .fb-divider{width:100%;height:1px;min-height:0}
+  .fb-side .fb-icon{width:40px;height:40px}
+  .fb-side .cnt{font-size:24px}
 }
 /* ================= MODALS ================= */
 .modal-bg{position:fixed;inset:0;background:rgba(2,6,12,.72);z-index:100;display:flex;
@@ -1126,7 +1127,12 @@ function normFeedback(v){
   return s;
 }
 function feedbackLabel(v){
-  return v==='Happy'?'😄 Happy':v==='Not Happy'?'☹️ Not Happy':v||'';
+  return v==='Happy'?'Happy':v==='Not Happy'?'Not Happy':v||'';
+}
+function fbFaceSVG(kind){
+  // Line-art faces matching the Customer Feedback Overview mock
+  if(kind==='happy') return `<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="27" fill="none" stroke="currentColor" stroke-width="3.5"/><circle cx="22" cy="26" r="3.2" fill="currentColor"/><circle cx="42" cy="26" r="3.2" fill="currentColor"/><path d="M20 37c3.5 9 20.5 9 24 0" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg>`;
+  return `<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="27" fill="none" stroke="currentColor" stroke-width="3.5"/><circle cx="22" cy="26" r="3.2" fill="currentColor"/><circle cx="42" cy="26" r="3.2" fill="currentColor"/><path d="M20 44c3.5-9 20.5-9 24 0" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg>`;
 }
 function parseRepairData(){
   const H=S.rawHeader, R=S.rawRows;
@@ -1255,8 +1261,8 @@ function filterConfig(){
     {k:'fsrReceived',label:'FSR Received',opts:()=>['Yes','No']},
     {k:'qrfReceived',label:'QRF Received',opts:()=>['Yes','No']},
     {k:'customerFeedback',label:'Customer Feedback',opts:()=>[
-      {v:'Happy',t:'😄 Happy'},
-      {v:'Not Happy',t:'☹️ Not Happy'},
+      {v:'Happy',t:'Happy'},
+      {v:'Not Happy',t:'Not Happy'},
     ]},
     {k:'itemType',label:'Item Type',opts:()=>uniqVals('itemType')},
   ];
@@ -1552,8 +1558,8 @@ const pillJobStatus=v=>{
 const pillYN=v=>v==='Yes'?`<span class="pill pill-ok">Yes</span>`
   : v==='No'?`<span class="pill pill-bad">No</span>`
   : v?`<span class="pill pill-mut">${esc(v)}</span>`:'—';
-const pillFeedback=v=>v==='Happy'?`<span class="pill pill-ok">😄 Happy</span>`
-  : v==='Not Happy'?`<span class="pill pill-bad">☹️ Not Happy</span>`
+const pillFeedback=v=>v==='Happy'?`<span class="pill pill-ok">Happy</span>`
+  : v==='Not Happy'?`<span class="pill pill-bad">Not Happy</span>`
   : v?`<span class="pill pill-mut">${esc(v)}</span>`:'—';
 
 /* ================================================================
@@ -1792,21 +1798,23 @@ function rOverview(c){
       {l:'FSR Received', v:fmtInt(st.fsrYes), s:`<b>${st.fsrRate}%</b> of jobs`},
       {l:'QRF Received', v:fmtInt(st.qrfYes), s:`<b>${st.qrfRate}%</b> of jobs`},
     ],160)+
-    `<div class="fb-mood-grid" aria-label="Customer feedback summary">
-      <div class="fb-mood happy">
-        <div class="emo" aria-hidden="true">😄</div>
-        <div class="fb-body">
-          <div class="lbl">Happy</div>
-          <div class="cnt">${fmtInt(st.happy)}</div>
-          <div class="sub"><b>${st.happyRate}%</b> of filtered jobs</div>
+    `<div class="fb-overview" aria-label="Customer feedback overview">
+      <div class="fb-overview-title">Customer Feedback Overview</div>
+      <div class="fb-overview-row">
+        <div class="fb-side happy">
+          <div class="fb-icon">${fbFaceSVG('happy')}</div>
+          <div class="fb-meta">
+            <div class="cnt">${fmtInt(st.happy)}</div>
+            <div class="lbl">Happy</div>
+          </div>
         </div>
-      </div>
-      <div class="fb-mood sad">
-        <div class="emo" aria-hidden="true">☹️</div>
-        <div class="fb-body">
-          <div class="lbl">Not Happy</div>
-          <div class="cnt">${fmtInt(st.notHappy)}</div>
-          <div class="sub"><b>${st.notHappyRate}%</b> of filtered jobs</div>
+        <div class="fb-divider" role="presentation"></div>
+        <div class="fb-side sad">
+          <div class="fb-icon">${fbFaceSVG('sad')}</div>
+          <div class="fb-meta">
+            <div class="cnt">${fmtInt(st.notHappy)}</div>
+            <div class="lbl">Not Happy</div>
+          </div>
         </div>
       </div>
     </div>`+
@@ -1932,9 +1940,9 @@ function rAnalytics(c){
         <div class="d">${peakI>=0?fmtInt(peakV)+' jobs':''}</div></div>
       <div class="insight"><div class="t">Top Model</div><div class="v">${esc(modelAgg[0]?.[0]||'—')}</div>
         <div class="d">${modelAgg[0]?fmtInt(modelAgg[0][1])+' jobs':''}</div></div>
-      <div class="insight i-ok"><div class="t">😄 Happy</div><div class="v">${fmtInt(st.happy)}</div>
+      <div class="insight i-ok"><div class="t">Happy</div><div class="v">${fmtInt(st.happy)}</div>
         <div class="d">${st.happyRate}% of filtered jobs</div></div>
-      <div class="insight i-bad"><div class="t">☹️ Not Happy</div><div class="v">${fmtInt(st.notHappy)}</div>
+      <div class="insight i-bad"><div class="t">Not Happy</div><div class="v">${fmtInt(st.notHappy)}</div>
         <div class="d">${st.notHappyRate}% of filtered jobs</div></div>
     </div>
     <div class="charts-grid">`+
@@ -2194,7 +2202,7 @@ function exportExcel(){
       ['Open / Other',st.open],['Customers',st.customers],['Technicians',st.technicians],
       ['FSR Received',st.fsrYes],['FSR Rate %',st.fsrRate],
       ['QRF Received',st.qrfYes],['QRF Rate %',st.qrfRate],
-      ['😄 Happy',st.happy],['☹️ Not Happy',st.notHappy],
+      ['Happy',st.happy],['Not Happy',st.notHappy],
       ['With Feedback',st.withFeedback],
     ]);
     aoaSheet(wb,'Repair Jobs',[
