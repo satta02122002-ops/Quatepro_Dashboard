@@ -220,25 +220,28 @@ table.tbl th.num{text-align:right}
 .insight .d{font-size:12px;color:var(--muted);margin-top:3px}
 .insight.i-ok{border-left-color:var(--ok)} .insight.i-warn{border-left-color:var(--warn)} .insight.i-bad{border-left-color:var(--bad)}
 /* ================= FEEDBACK OVERVIEW (Repair) ================= */
-.fb-overview{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 18px 16px;box-shadow:var(--shadow)}
-.fb-overview-title{text-align:center;font-size:12px;font-weight:750;letter-spacing:.08em;text-transform:uppercase;color:var(--text);margin-bottom:12px}
-.fb-overview-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px}
-.fb-divider{width:1px;align-self:stretch;background:var(--border);min-height:56px}
-.fb-side{display:flex;align-items:center;justify-content:center;gap:14px;padding:4px 10px;min-width:0}
-.fb-side .fb-icon{width:48px;height:48px;flex-shrink:0}
+.r-top-row{display:flex;flex-wrap:wrap;gap:14px;align-items:stretch}
+.r-top-row .kpi-grid{flex:1 1 520px;min-width:0}
+.fb-overview{background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:10px 12px 11px;box-shadow:var(--shadow);flex:0 1 250px;width:250px;max-width:100%;
+  display:flex;flex-direction:column;justify-content:center;min-height:100%}
+.fb-overview-title{text-align:center;font-size:10px;font-weight:750;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.fb-overview-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:4px}
+.fb-divider{width:1px;align-self:stretch;background:var(--border);min-height:40px}
+.fb-side{display:flex;align-items:center;justify-content:center;gap:8px;padding:2px 4px;min-width:0}
+.fb-side .fb-icon{width:28px;height:28px;flex-shrink:0}
 .fb-side .fb-icon svg{width:100%;height:100%;display:block}
 .fb-side.happy .fb-icon{color:var(--ok)}
 .fb-side.sad .fb-icon{color:var(--bad)}
-.fb-side .fb-meta{display:flex;flex-direction:column;gap:1px;min-width:0}
-.fb-side .cnt{font-size:28px;font-weight:750;letter-spacing:-.03em;line-height:1.1;font-variant-numeric:tabular-nums}
+.fb-side .fb-meta{display:flex;flex-direction:column;gap:0;min-width:0}
+.fb-side .cnt{font-size:18px;font-weight:750;letter-spacing:-.02em;line-height:1.1;font-variant-numeric:tabular-nums}
 .fb-side.happy .cnt{color:var(--ok)}
 .fb-side.sad .cnt{color:var(--bad)}
-.fb-side .lbl{font-size:12px;font-weight:750;letter-spacing:.06em;text-transform:uppercase;color:var(--text)}
+.fb-side .lbl{font-size:9px;font-weight:750;letter-spacing:.05em;text-transform:uppercase;color:var(--text)}
 @media(max-width:760px){
-  .fb-overview-row{grid-template-columns:1fr;gap:12px}
-  .fb-divider{width:100%;height:1px;min-height:0}
-  .fb-side .fb-icon{width:40px;height:40px}
-  .fb-side .cnt{font-size:24px}
+  .r-top-row .kpi-grid{flex-basis:100%}
+  .fb-overview{flex:1 1 100%;width:100%}
 }
 /* ================= MODALS ================= */
 .modal-bg{position:fixed;inset:0;background:rgba(2,6,12,.72);z-index:100;display:flex;
@@ -1790,34 +1793,36 @@ function rStats(rows){
 function rOverview(c){
   const st=rStats(S.gfData);
   c.innerHTML=
-    `<div class="fb-overview" aria-label="Customer Feedback">
-      <div class="fb-overview-title">Customer Feedback</div>
-      <div class="fb-overview-row">
-        <div class="fb-side happy">
-          <div class="fb-icon">${fbFaceSVG('happy')}</div>
-          <div class="fb-meta">
-            <div class="cnt">${fmtInt(st.happy)}</div>
-            <div class="lbl">Happy</div>
+    `<div class="r-top-row">`+
+      kpiHTML([
+        {l:'Total Jobs', v:fmtInt(st.total), s:`<b>${fmtInt(st.customers)}</b> customers`},
+        {l:'Completed', v:fmtInt(st.completed), s:`<b>${st.completeRate}%</b> completion`, cls:'k-ok'},
+        {l:'Open / Other', v:fmtInt(st.open), s:'not marked completed', cls:'k-warn'},
+        {l:'Technicians', v:fmtInt(st.technicians), s:'active in filtered view', cls:'k-acc'},
+        {l:'FSR Received', v:fmtInt(st.fsrYes), s:`<b>${st.fsrRate}%</b> of jobs`},
+        {l:'QRF Received', v:fmtInt(st.qrfYes), s:`<b>${st.qrfRate}%</b> of jobs`},
+      ],140)+
+      `<div class="fb-overview" aria-label="Customer feedback overview">
+        <div class="fb-overview-title">Customer Feedback Overview</div>
+        <div class="fb-overview-row">
+          <div class="fb-side happy">
+            <div class="fb-icon">${fbFaceSVG('happy')}</div>
+            <div class="fb-meta">
+              <div class="cnt">${fmtInt(st.happy)}</div>
+              <div class="lbl">Happy</div>
+            </div>
+          </div>
+          <div class="fb-divider" role="presentation"></div>
+          <div class="fb-side sad">
+            <div class="fb-icon">${fbFaceSVG('sad')}</div>
+            <div class="fb-meta">
+              <div class="cnt">${fmtInt(st.notHappy)}</div>
+              <div class="lbl">Not Happy</div>
+            </div>
           </div>
         </div>
-        <div class="fb-divider" role="presentation"></div>
-        <div class="fb-side sad">
-          <div class="fb-icon">${fbFaceSVG('sad')}</div>
-          <div class="fb-meta">
-            <div class="cnt">${fmtInt(st.notHappy)}</div>
-            <div class="lbl">Not Happy</div>
-          </div>
-        </div>
-      </div>
-    </div>`+
-    kpiHTML([
-      {l:'Total Jobs', v:fmtInt(st.total), s:`<b>${fmtInt(st.customers)}</b> customers`},
-      {l:'Completed', v:fmtInt(st.completed), s:`<b>${st.completeRate}%</b> completion`, cls:'k-ok'},
-      {l:'Open / Other', v:fmtInt(st.open), s:'not marked completed', cls:'k-warn'},
-      {l:'Technicians', v:fmtInt(st.technicians), s:'active in filtered view', cls:'k-acc'},
-      {l:'FSR Received', v:fmtInt(st.fsrYes), s:`<b>${st.fsrRate}%</b> of jobs`},
-      {l:'QRF Received', v:fmtInt(st.qrfYes), s:`<b>${st.qrfRate}%</b> of jobs`},
-    ],160)+
+      </div>`+
+    `</div>`+
     `<div class="charts-grid">`+
       chartCard('ch-rtrend','Jobs Trend','Repair jobs per month by job / created date',8)+
       chartCard('ch-rstatus','Status Mix','Share of jobs by status',4)+
