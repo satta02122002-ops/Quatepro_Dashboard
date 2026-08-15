@@ -115,7 +115,9 @@ h1,h2,h3{font-weight:650;letter-spacing:-.01em}
 .mods-title{text-align:center}
 .mods-title h1{font-size:26px;margin-bottom:6px}
 .mods-title p{color:var(--muted)}
-.mods-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,380px));gap:22px;justify-content:center;width:100%;max-width:860px}
+.mods-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,360px));gap:22px;justify-content:center;width:100%;max-width:1180px}
+.btn-warn{background:var(--warn);border-color:var(--warn);color:#fff}
+.btn-warn:hover{filter:brightness(1.1);background:var(--warn)}
 .mod-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;
   display:flex;flex-direction:column;gap:14px;box-shadow:var(--shadow);transition:transform .15s,border-color .15s}
 .mod-card:hover{transform:translateY(-3px);border-color:var(--accent)}
@@ -326,6 +328,13 @@ table.tbl th.num{text-align:right}
         <div class="tags"><span class="tag">PMC Contracts</span><span class="tag">Trucks</span><span class="tag">Active/Expired</span><span class="tag">Approvals</span></div>
         <button class="btn btn-ok" style="justify-content:center" onclick="openModule('pmc')">Launch PMC Dashboard</button>
       </div>
+      <div class="mod-card">
+        <div class="mod-icon" style="background:var(--warn-soft);color:var(--warn)">🔧</div>
+        <h2>Repair Work Dashboard</h2>
+        <p>Field repair analytics — jobs, technicians, FSR/QRF, status and feedback</p>
+        <div class="tags"><span class="tag">Repair Jobs</span><span class="tag">Technicians</span><span class="tag">FSR / QRF</span><span class="tag">Feedback</span></div>
+        <button class="btn btn-warn" style="justify-content:center" onclick="openModule('repair')">Launch Repair Work Dashboard</button>
+      </div>
     </div>
   </div>
   <div class="footer">QuotePro — Intelligence Dashboard</div>
@@ -511,14 +520,14 @@ table.tbl th.num{text-align:right}
 'use strict';
 /* ================================================================
    QuotePro Suite — single-file BI dashboard
-   Modules: Quotation Dashboard · PMC Dashboard
+   Modules: Quotation Dashboard · PMC Dashboard · Repair Work Dashboard
    ================================================================ */
 
 /* ---------------- state ---------------- */
 const S = {
   user: null,               // {u, role}
   pendingUser: null,        // awaiting 2FA
-  mode: null,               // 'quotation' | 'pmc'
+  mode: null,               // 'quotation' | 'pmc' | 'repair'
   fileName: '',
   rawHeader: [],            // raw header cells
   rawRows: [],              // raw data rows (array of arrays)
@@ -728,15 +737,27 @@ document.querySelectorAll('[data-themesel]').forEach(s=>s.addEventListener('chan
 /* ================================================================
    MODULE / NAVIGATION
    ================================================================ */
+function moduleLabel(mode){
+  return mode==='quotation'?'QuotePro Dashboard'
+    : mode==='repair'?'Repair Work Dashboard'
+    : 'PMC Dashboard';
+}
 function openModule(mode){
   S.mode=mode;
-  const q = mode==='quotation';
-  $('up-title').textContent = q?'QuotePro Dashboard':'PMC Dashboard';
-  $('up-badge').textContent = q?'Quotation Upload':'PMC Upload';
-  $('up-head').textContent  = q?'Upload Quotation Data':'Upload PMC Contract Data';
-  $('up-sub').textContent   = q?'Drop your quotation summary Excel export below'
-                               :'Drop your PMC contract tracker Excel export below';
+  $('up-title').textContent = moduleLabel(mode);
+  $('up-badge').textContent = mode==='quotation'?'Quotation Upload'
+    : mode==='repair'?'Repair Upload':'PMC Upload';
+  $('up-head').textContent  = mode==='quotation'?'Upload Quotation Data'
+    : mode==='repair'?'Upload Repair Work Data':'Upload PMC Contract Data';
+  $('up-sub').textContent   = mode==='quotation'?'Drop your quotation summary Excel export below'
+    : mode==='repair'?'Drop your repair / field-service Excel export below'
+    : 'Drop your PMC contract tracker Excel export below';
   showScreen('screen-upload');
+}
+function parseCurrentData(){
+  if(S.mode==='quotation') return parseQuotationData();
+  if(S.mode==='repair') return parseRepairData();
+  return parsePmcData();
 }
 
 /* ================================================================
@@ -752,7 +773,9 @@ fi.addEventListener('change', ()=>{ if(fi.files.length) handleFile(fi.files[0]);
 
 function pickSheet(wb){
   const names=wb.SheetNames;
-  const want = S.mode==='quotation' ? /quot/i : /pmc|track/i;
+  const want = S.mode==='quotation' ? /quot/i
+    : S.mode==='repair' ? /repair|fsr|job|work|service/i
+    : /pmc|track/i;
   return names.find(n=>want.test(n)) || names[0];
 }
 function handleFile(file){
@@ -801,8 +824,7 @@ function cleanStats(){
   return {total:rows.length, empty, dups, ws};
 }
 function openCleanScreen(){
-  const q=S.mode==='quotation';
-  $('cl-title').textContent=q?'QuotePro Dashboard':'PMC Dashboard';
+  $('cl-title').textContent=moduleLabel(S.mode);
   $('cl-file').textContent='📄 '+S.fileName;
   renderCleanScreen();
   showScreen('screen-clean');
@@ -849,7 +871,7 @@ function enterDashboard(clean){
   setTimeout(()=>{
     try{
       if(clean) autoClean();
-      S.allData = S.mode==='quotation' ? parseQuotationData() : parsePmcData();
+      S.allData = parseCurrentData();
       if(!S.allData.length){ overlay(false); toast('No usable records found — check the file columns.','bad'); return; }
       S.filters={}; S.tab='overview'; S.page=1; S.search=''; S.sortKey=null;
       buildDashboardShell();
@@ -888,7 +910,7 @@ $('rp-apply').addEventListener('click', ()=>{
 function afterRawEdit(){
   if(!$('screen-clean').classList.contains('hidden')) renderCleanScreen();
   if(!$('screen-dash').classList.contains('hidden')){
-    S.allData = S.mode==='quotation' ? parseQuotationData() : parsePmcData();
+    S.allData = parseCurrentData();
     buildDashboardShell(); applyFilters();
   }
 }
@@ -903,7 +925,17 @@ function nameKey(s){
 }
 let smartGroups=[];
 function openSmartModal(){
-  const custCol = S.mode==='quotation'
+  const custCol = S.mode==='repair'
+    ? (()=>{
+        const exact=S.rawHeader.findIndex(h=>['title','customername','customer','client'].includes(normH(h)));
+        if(exact>=0) return exact;
+        const hits=findCols(S.rawHeader,['customername','customer','client']).filter(i=>{
+          const h=normH(S.rawHeader[i]);
+          return !h.includes('feedback') && !h.includes('comment') && !h.includes('contact');
+        });
+        return hits[0]??-1;
+      })()
+    : S.mode==='quotation'
     ? findCol(S.rawHeader,['customername','customer','client'])
     : findCol(S.rawHeader,['customername','customer']);
   if(custCol<0){ toast('No customer column detected.','bad'); return; }
@@ -1059,6 +1091,106 @@ function parsePmcData(){
   return out;
 }
 
+function ynVal(v){
+  const s=String(v??'').trim();
+  if(!s) return '';
+  if(/^(y|yes|true|1)$/i.test(s)) return 'Yes';
+  if(/^(n|no|false|0)$/i.test(s)) return 'No';
+  return s;
+}
+function parseRepairData(){
+  const H=S.rawHeader, R=S.rawRows;
+  const col={
+    serial:          findCol(H,['serialnumber','serialno','serial']),
+    customer:        (()=>{
+      // Prefer Title / Customer Name; never pick feedback or comment columns
+      const exact=H.findIndex(h=>['title','customername','customer','client'].includes(normH(h)));
+      if(exact>=0) return exact;
+      const hits=findCols(H,['customername','customer','client']).filter(i=>{
+        const h=normH(H[i]);
+        return !h.includes('feedback') && !h.includes('comment') && !h.includes('contact');
+      });
+      return hits[0]??-1;
+    })(),
+    jobScope:        findCol(H,['jobscope','scopeofwork','scope']),
+    model:           findCol(H,['model']),
+    task:            findCol(H,['task','taskname']),
+    jobType:         findCol(H,['jobtype','worktype']),
+    technician:      findCol(H,['technician','techname','tech','assignedto']),
+    contactPerson:   findCol(H,['contactperson','contactname']),
+    contactNumber:   findCol(H,['contactnumber','phonenumber','mobile','phone']),
+    fsrReceived:     findCol(H,['fsrreceived','fsrrecd','fsrrecv']),
+    fsrNumber:       findCol(H,['fsrnumber','fsrno']),
+    qrfReceived:     findCol(H,['qrfreceived','qrfrecd','qrfrecv']),
+    qrfNumber:       findCol(H,['qrfnumber','qrfno']),
+    remarks:         findCol(H,['remarks','remark','notes']),
+    status:          findCol(H,['jobstatus','status']),
+    createdBy:       findCol(H,['createdby']),
+    itemType:        findCol(H,['itemtype','contenttype']),
+    customerComments:findCol(H,['customercomments','customercomment']),
+  };
+  // Prefer dedicated job date; fall back to a bare "Date" column via bestDateCol among *date* hits
+  col.jobDate = bestDateCol(findCols(H,['jobdate','workdate','servicedate','repairdate']), R);
+  if(col.jobDate<0){
+    const dateHits=findCols(H,['date']).filter(i=>{
+      const h=normH(H[i]);
+      return h==='date' || (!h.includes('feedback') && !h.includes('created') && !h.includes('approved'));
+    });
+    col.jobDate=bestDateCol(dateHits.length?dateHits:findCols(H,['date']), R);
+  }
+  col.created = bestDateCol(findCols(H,['createdtime','createddate','createdon']), R);
+  if(col.created<0){
+    const createdHits=[]; H.forEach((h,i)=>{ if(normH(h)==='created') createdHits.push(i); });
+    col.created=bestDateCol(createdHits, R);
+  }
+  col.feedbackDate = bestDateCol(findCols(H,['customerfeedbackdate','feedbackdate']), R);
+  // Text feedback column — exclude the date header that also contains "feedback"
+  {
+    const fbHits=findCols(H,['customerfeedback','feedback']).filter(i=>{
+      const h=normH(H[i]);
+      return !h.includes('date') && h!=='customerfeedbackdate';
+    });
+    col.customerFeedback=fbHits[0]??-1;
+  }
+  const get=(r,c)=>c>=0?cleanCell(r[c]):null;
+  const out=[];
+  R.forEach((r,i)=>{
+    const customer=get(r,col.customer), serial=get(r,col.serial), fsr=get(r,col.fsrNumber);
+    if(!customer && !serial && !fsr) return;
+    const jobDate=parseDateVal(get(r,col.jobDate));
+    const created=parseDateVal(get(r,col.created));
+    const rec={
+      sr:i+1,
+      serial:String(serial??''),
+      customer:String(customer??''),
+      jobScope:String(get(r,col.jobScope)??''),
+      model:String(get(r,col.model)??''),
+      task:String(get(r,col.task)??''),
+      jobType:String(get(r,col.jobType)??''),
+      jobDate,
+      technician:String(get(r,col.technician)??''),
+      contactPerson:String(get(r,col.contactPerson)??''),
+      contactNumber:String(get(r,col.contactNumber)??''),
+      fsrReceived:ynVal(get(r,col.fsrReceived)),
+      fsrNumber:String(get(r,col.fsrNumber)??''),
+      qrfReceived:ynVal(get(r,col.qrfReceived)),
+      qrfNumber:String(get(r,col.qrfNumber)??''),
+      remarks:String(get(r,col.remarks)??''),
+      status:String(get(r,col.status)??''),
+      createdBy:String(get(r,col.createdBy)??''),
+      created,
+      itemType:String(get(r,col.itemType)??''),
+      feedbackDate:parseDateVal(get(r,col.feedbackDate)),
+      customerFeedback:String(get(r,col.customerFeedback)??''),
+      customerComments:String(get(r,col.customerComments)??''),
+    };
+    rec.isCompleted=/complet/i.test(rec.status);
+    rec.reportDate=jobDate || created || rec.feedbackDate || null;
+    out.push(rec);
+  });
+  return out;
+}
+
 /* ================================================================
    FILTERS
    ================================================================ */
@@ -1080,6 +1212,19 @@ function filterConfig(){
     {k:'status',label:'Status',opts:()=>['Approved','Pending']},
     {k:'minVal',label:'Min Value',num:true},
     {k:'maxVal',label:'Max Value',num:true},
+  ];
+  if(S.mode==='repair') return [
+    {k:'year',label:'Year',opts:()=>uniqYears()},
+    {k:'quarter',label:'Quarter',opts:()=>QUARTERS},
+    {k:'month',label:'Month',opts:()=>MONTHS.map((m,i)=>({v:String(i),t:m}))},
+    {k:'customer',label:'Customer',opts:()=>uniqVals('customer')},
+    {k:'jobType',label:'Job Type',opts:()=>uniqVals('jobType')},
+    {k:'status',label:'Status',opts:()=>uniqVals('status')},
+    {k:'technician',label:'Technician',opts:()=>uniqVals('technician')},
+    {k:'model',label:'Model',opts:()=>uniqVals('model')},
+    {k:'fsrReceived',label:'FSR Received',opts:()=>['Yes','No']},
+    {k:'qrfReceived',label:'QRF Received',opts:()=>['Yes','No']},
+    {k:'itemType',label:'Item Type',opts:()=>uniqVals('itemType')},
   ];
   return [
     {k:'year',label:'Year',opts:()=>uniqYears()},
@@ -1146,6 +1291,15 @@ function applyFilters(){
       if(f.status && r.status!==f.status) return false;
       if(f.minVal && r.value<+f.minVal) return false;
       if(f.maxVal && r.value>+f.maxVal) return false;
+    }else if(S.mode==='repair'){
+      if(f.customer && r.customer!==f.customer) return false;
+      if(f.jobType && r.jobType!==f.jobType) return false;
+      if(f.status && r.status!==f.status) return false;
+      if(f.technician && r.technician!==f.technician) return false;
+      if(f.model && r.model!==f.model) return false;
+      if(f.fsrReceived && r.fsrReceived!==f.fsrReceived) return false;
+      if(f.qrfReceived && r.qrfReceived!==f.qrfReceived) return false;
+      if(f.itemType && r.itemType!==f.itemType) return false;
     }else{
       if(f.department && r.department!==f.department) return false;
       if(f.customer && r.customer!==f.customer) return false;
@@ -1185,12 +1339,14 @@ function renderChips(){
    DASHBOARD SHELL
    ================================================================ */
 function buildDashboardShell(){
-  const q=S.mode==='quotation';
-  $('d-title').textContent=q?'QuotePro Dashboard':'PMC Dashboard';
-  $('d-badge').textContent=q?'Quotation Analytics':'PMC Analytics';
+  $('d-title').textContent=moduleLabel(S.mode);
+  $('d-badge').textContent=S.mode==='quotation'?'Quotation Analytics'
+    : S.mode==='repair'?'Repair Analytics':'PMC Analytics';
   $('btn-export').classList.toggle('hidden', S.user?.role!=='admin');
-  const tabs=q
+  const tabs=S.mode==='quotation'
     ? [['overview','Overview'],['quotations','Quotations'],['customers','Customers'],['regions','Regions'],['brands','Brands'],['analytics','Analytics']]
+    : S.mode==='repair'
+    ? [['overview','Overview'],['jobs','Jobs'],['technicians','Technicians'],['customers','Customers'],['analytics','Analytics']]
     : [['overview','Overview'],['contracts','Contracts'],['customers','Customers'],['analytics','Analytics']];
   $('tabbar').innerHTML=tabs.map(([k,t])=>`<button data-tab="${k}" class="${k===S.tab?'active':''}">${t}</button>`).join('');
   document.querySelectorAll('#tabbar [data-tab]').forEach(b=>b.addEventListener('click', ()=>{
@@ -1271,6 +1427,9 @@ function renderDashboard(){
   if(S.mode==='quotation'){
     ({overview:qOverview, quotations:qQuotations, customers:qCustomers,
       regions:qRegions, brands:qBrands, analytics:qAnalytics}[S.tab]||qOverview)(c);
+  }else if(S.mode==='repair'){
+    ({overview:rOverview, jobs:rJobs, technicians:rTechnicians,
+      customers:rCustomers, analytics:rAnalytics}[S.tab]||rOverview)(c);
   }else{
     ({overview:pOverview, contracts:pContracts, customers:pCustomers,
       analytics:pAnalytics}[S.tab]||pOverview)(c);
@@ -1347,6 +1506,16 @@ function renderDataTable(el, cols, rows, opts){
 const pillStatus=v=>v==='Approved'?`<span class="pill pill-ok">Approved</span>`:`<span class="pill pill-warn">Pending</span>`;
 const pillContract=v=>v==='Active'?`<span class="pill pill-ok">Active</span>`
   : v==='Expired'?`<span class="pill pill-bad">Expired</span>`:`<span class="pill pill-mut">—</span>`;
+const pillJobStatus=v=>{
+  if(!v) return '—';
+  if(/complet/i.test(v)) return `<span class="pill pill-ok">${esc(v)}</span>`;
+  if(/progress|open|pend|assign|hold/i.test(v)) return `<span class="pill pill-warn">${esc(v)}</span>`;
+  if(/cancel|fail|reject|close/i.test(v)) return `<span class="pill pill-bad">${esc(v)}</span>`;
+  return `<span class="pill pill-mut">${esc(v)}</span>`;
+};
+const pillYN=v=>v==='Yes'?`<span class="pill pill-ok">Yes</span>`
+  : v==='No'?`<span class="pill pill-bad">No</span>`
+  : v?`<span class="pill pill-mut">${esc(v)}</span>`:'—';
 
 /* ================================================================
    QUOTATION — OVERVIEW
@@ -1428,6 +1597,7 @@ function aggBy(rows, keyField){
     if(!m.has(k)) m.set(k,{key:k,n:0,value:0,approved:0,pending:0,trucks:0});
     const a=m.get(k); a.n++; a.value+=r.value||0; a.trucks+=r.trucks||0;
     if(S.mode==='quotation'){ r.status==='Approved'?a.approved++:a.pending++; }
+    else if(S.mode==='repair'){ r.isCompleted?a.approved++:a.pending++; }
     else { r.isApproved?a.approved++:a.pending++; }
   });
   return [...m.values()];
@@ -1553,8 +1723,191 @@ function qAnalytics(c){
       scales:{x:{grid:{color:'transparent'},ticks:{color:cv('--tick')},border:{color:cv('--border')}},
         y:{grid:{color:cv('--grid')},ticks:{color:cv('--tick'),precision:0},border:{display:false},beginAtZero:true}}})});
 }
-</script>
-<script>
+
+/* ================================================================
+   REPAIR WORK — OVERVIEW
+   ================================================================ */
+function rStats(rows){
+  const total=rows.length;
+  const completed=rows.filter(r=>r.isCompleted).length;
+  const open=total-completed;
+  const customers=new Set(rows.map(r=>r.customer).filter(Boolean)).size;
+  const technicians=new Set(rows.map(r=>r.technician).filter(Boolean)).size;
+  const fsrYes=rows.filter(r=>r.fsrReceived==='Yes').length;
+  const qrfYes=rows.filter(r=>r.qrfReceived==='Yes').length;
+  const withFeedback=rows.filter(r=>r.customerFeedback || r.customerComments || r.feedbackDate).length;
+  return {total, completed, open, customers, technicians, fsrYes, qrfYes, withFeedback,
+    completeRate:pct(completed,total), fsrRate:pct(fsrYes,total), qrfRate:pct(qrfYes,total)};
+}
+function rOverview(c){
+  const st=rStats(S.gfData);
+  c.innerHTML=
+    kpiHTML([
+      {l:'Total Jobs', v:fmtInt(st.total), s:`<b>${fmtInt(st.customers)}</b> customers`},
+      {l:'Completed', v:fmtInt(st.completed), s:`<b>${st.completeRate}%</b> completion`, cls:'k-ok'},
+      {l:'Open / Other', v:fmtInt(st.open), s:'not marked completed', cls:'k-warn'},
+      {l:'Technicians', v:fmtInt(st.technicians), s:'active in filtered view', cls:'k-acc'},
+      {l:'FSR Received', v:fmtInt(st.fsrYes), s:`<b>${st.fsrRate}%</b> of jobs`},
+      {l:'QRF Received', v:fmtInt(st.qrfYes), s:`<b>${st.qrfRate}%</b> of jobs`},
+    ],160)+
+    `<div class="charts-grid">`+
+      chartCard('ch-rtrend','Jobs Trend','Repair jobs per month by job / created date',8)+
+      chartCard('ch-rstatus','Status Mix','Share of jobs by status',4)+
+      chartCard('ch-rvol','Monthly Volume','Completed vs open jobs per month',7)+
+      chartCard('ch-rjob','Job Type Mix','Jobs by job type',5)+
+    `</div>`;
+  const ms=monthlySeries(S.gfData, ()=>1);
+  mkChart('ch-rtrend',{type:'line',
+    data:{labels:ms.labels, datasets:[{label:'Jobs', data:ms.values,
+      borderColor:cv('--s1'), backgroundColor:cv('--s1')+'22', borderWidth:2, fill:true,
+      pointRadius:3, pointHoverRadius:5, pointBackgroundColor:cv('--s1'), tension:.3}]},
+    options:baseOpts({plugins:{legend:{display:false}}, interaction:{mode:'index',intersect:false},
+      scales:{x:{grid:{color:'transparent'},ticks:{color:cv('--tick')},border:{color:cv('--border')}},
+        y:{grid:{color:cv('--grid')},ticks:{color:cv('--tick'),precision:0},border:{display:false},beginAtZero:true}}})});
+  const stAgg=[...groupSum(S.gfData, r=>r.status||'(Blank)', ()=>1).entries()].sort((a,b)=>b[1]-a[1]);
+  mkChart('ch-rstatus', donutCfg(stAgg.map(x=>x[0]), stAgg.map(x=>x[1]), SERIES().slice(0,stAgg.length)));
+  const keys=monthlyKeys(S.gfData);
+  const doneM=groupSum(S.gfData.filter(r=>r.isCompleted), r=>monthKey(r.reportDate), ()=>1);
+  const openM=groupSum(S.gfData.filter(r=>!r.isCompleted), r=>monthKey(r.reportDate), ()=>1);
+  mkChart('ch-rvol',{type:'bar',
+    data:{labels:keys.map(monthLabel), datasets:[
+      {label:'Completed', data:keys.map(k=>doneM.get(k)||0), backgroundColor:cv('--ok'),
+        borderColor:cv('--card'), borderRadius:{topLeft:4,topRight:4}, barPercentage:.55, maxBarThickness:64, stack:'s'},
+      {label:'Open / Other', data:keys.map(k=>openM.get(k)||0), backgroundColor:cv('--warn'),
+        borderColor:cv('--card'), borderWidth:{top:2}, barPercentage:.55, maxBarThickness:64, stack:'s'},
+    ]},
+    options:baseOpts({scales:{x:{stacked:true,grid:{color:'transparent'},ticks:{color:cv('--tick')},border:{color:cv('--border')}},
+      y:{stacked:true,grid:{color:cv('--grid')},ticks:{color:cv('--tick'),precision:0},border:{display:false},beginAtZero:true}}})});
+  const jt=[...groupSum(S.gfData, r=>r.jobType||'(Blank)', ()=>1).entries()].sort((a,b)=>b[1]-a[1]);
+  const top=jt.slice(0,6), other=jt.slice(6).reduce((a,[,v])=>a+v,0);
+  const labels=top.map(x=>x[0]).concat(other>0?['Other']:[]);
+  const vals=top.map(x=>x[1]).concat(other>0?[other]:[]);
+  mkChart('ch-rjob', donutCfg(labels, vals, SERIES().slice(0,labels.length)));
+}
+
+/* ================= REPAIR — JOBS TABLE ================= */
+function rJobs(c){
+  renderDataTable(c,[
+    {k:'serial',t:'Serial Number'},
+    {k:'customer',t:'Title / Customer Name'},
+    {k:'jobScope',t:'Job Scope'},
+    {k:'model',t:'Model'},
+    {k:'task',t:'Task'},
+    {k:'jobType',t:'Job Type'},
+    {k:'jobDate',t:'Date'},
+    {k:'technician',t:'Technician'},
+    {k:'contactPerson',t:'Contact Person'},
+    {k:'contactNumber',t:'Contact Number'},
+    {k:'fsrReceived',t:'FSR Received',fmt:pillYN},
+    {k:'fsrNumber',t:'FSR Number'},
+    {k:'qrfReceived',t:'QRF Received',fmt:pillYN},
+    {k:'qrfNumber',t:'QRF Number'},
+    {k:'remarks',t:'Remarks'},
+    {k:'status',t:'Status',fmt:pillJobStatus},
+    {k:'createdBy',t:'Created By'},
+    {k:'created',t:'Created'},
+    {k:'itemType',t:'Item Type'},
+    {k:'feedbackDate',t:'Customer Feedback Date'},
+    {k:'customerFeedback',t:'Customer Feedback'},
+    {k:'customerComments',t:'Customer Comments'},
+  ], S.gfData, {what:'jobs'});
+}
+
+/* ================= REPAIR — TECHNICIANS ================= */
+function rTechnicians(c){
+  const m=new Map();
+  S.gfData.forEach(r=>{
+    const k=r.technician||'(Blank)';
+    if(!m.has(k)) m.set(k,{key:k,n:0,completed:0,fsr:0,qrf:0,customers:new Set()});
+    const a=m.get(k); a.n++; if(r.isCompleted) a.completed++;
+    if(r.fsrReceived==='Yes') a.fsr++; if(r.qrfReceived==='Yes') a.qrf++;
+    if(r.customer) a.customers.add(r.customer);
+  });
+  const rows=[...m.values()].sort((a,b)=>b.n-a.n).map((a,i)=>({
+    rank:i+1, technician:a.key, n:a.n, completed:a.completed,
+    rate:pct(a.completed,a.n), fsr:a.fsr, qrf:a.qrf, customers:a.customers.size,
+  }));
+  c.innerHTML=`<div class="charts-grid">`+chartCard('ch-rtech','Jobs by Technician','Top technicians by job count',12)+`</div><div id="tech-tbl"></div>`;
+  const top=rows.slice(0,12);
+  mkChart('ch-rtech',{type:'bar',
+    data:{labels:top.map(a=>a.technician), datasets:[{label:'Jobs', data:top.map(a=>a.n),
+      backgroundColor:cv('--s3'), borderRadius:{topLeft:4,topRight:4}, barPercentage:.55, maxBarThickness:64}]},
+    options:baseOpts({plugins:{legend:{display:false}},
+      scales:{x:{grid:{color:'transparent'},ticks:{color:cv('--tick')},border:{color:cv('--border')}},
+        y:{grid:{color:cv('--grid')},ticks:{color:cv('--tick'),precision:0},border:{display:false},beginAtZero:true}}})});
+  renderDataTable($('tech-tbl'),[
+    {k:'rank',t:'#',num:true},{k:'technician',t:'Technician'},{k:'n',t:'Jobs',num:true},
+    {k:'completed',t:'Completed',num:true},
+    {k:'rate',t:'Completion %',num:true,fmt:v=>`<span class="pill pill-ok">${v}%</span>`},
+    {k:'fsr',t:'FSR Yes',num:true},{k:'qrf',t:'QRF Yes',num:true},
+    {k:'customers',t:'Customers',num:true},
+  ], rows, {what:'technicians'});
+}
+
+/* ================= REPAIR — CUSTOMERS ================= */
+function rCustomers(c){
+  const rows=aggBy(S.gfData,'customer').sort((a,b)=>b.n-a.n)
+    .map((a,i)=>({rank:i+1, customer:a.key, n:a.n, completed:a.approved,
+      rate:pct(a.approved,a.n), pending:a.pending}));
+  renderDataTable(c,[
+    {k:'rank',t:'#',num:true},{k:'customer',t:'Customer'},{k:'n',t:'Jobs',num:true},
+    {k:'completed',t:'Completed',num:true},
+    {k:'rate',t:'Completion %',num:true,fmt:v=>`<span class="pill pill-ok">${v}%</span>`},
+    {k:'pending',t:'Open / Other',num:true},
+  ], rows, {what:'customers'});
+}
+
+/* ================= REPAIR — ANALYTICS ================= */
+function rAnalytics(c){
+  const st=rStats(S.gfData);
+  const ms=monthlySeries(S.gfData, ()=>1);
+  let peakI=-1,peakV=-1; ms.values.forEach((v,i)=>{ if(v>peakV){peakV=v;peakI=i;} });
+  const techAgg=[...groupSum(S.gfData, r=>r.technician||'(Blank)', ()=>1).entries()].sort((a,b)=>b[1]-a[1]);
+  const modelAgg=[...groupSum(S.gfData, r=>r.model||'(Blank)', ()=>1).entries()].sort((a,b)=>b[1]-a[1]);
+  c.innerHTML=
+    `<div class="insight-grid">
+      <div class="insight"><div class="t">Top Technician</div><div class="v">${esc(techAgg[0]?.[0]||'—')}</div>
+        <div class="d">${techAgg[0]?fmtInt(techAgg[0][1])+' jobs':''}</div></div>
+      <div class="insight i-ok"><div class="t">Peak Volume Month</div><div class="v">${peakI>=0?ms.labels[peakI]:'—'}</div>
+        <div class="d">${peakI>=0?fmtInt(peakV)+' jobs':''}</div></div>
+      <div class="insight"><div class="t">Top Model</div><div class="v">${esc(modelAgg[0]?.[0]||'—')}</div>
+        <div class="d">${modelAgg[0]?fmtInt(modelAgg[0][1])+' jobs':''}</div></div>
+      <div class="insight ${st.withFeedback?'i-ok':'i-warn'}"><div class="t">With Feedback</div><div class="v">${fmtInt(st.withFeedback)}</div>
+        <div class="d">${pct(st.withFeedback,st.total)}% of jobs have feedback</div></div>
+    </div>
+    <div class="charts-grid">`+
+      chartCard('ch-rfsr','FSR / QRF Receipt','Yes vs No for FSR and QRF',6,'short')+
+      chartCard('ch-rmodel','Top Models','Jobs by equipment model',6,'short')+
+      chartCard('ch-rcomp','Completion Trend','Completed % of jobs per month',12,'short')+
+    `</div>`;
+  mkChart('ch-rfsr',{type:'bar',
+    data:{labels:['FSR','QRF'], datasets:[
+      {label:'Yes', data:[st.fsrYes, st.qrfYes], backgroundColor:cv('--ok'),
+        borderRadius:{topLeft:4,topRight:4}, barPercentage:.55, maxBarThickness:64},
+      {label:'No / Blank', data:[st.total-st.fsrYes, st.total-st.qrfYes], backgroundColor:cv('--warn'),
+        borderRadius:{topLeft:4,topRight:4}, barPercentage:.55, maxBarThickness:64},
+    ]},
+    options:baseOpts({scales:{x:{grid:{color:'transparent'},ticks:{color:cv('--tick')},border:{color:cv('--border')}},
+      y:{grid:{color:cv('--grid')},ticks:{color:cv('--tick'),precision:0},border:{display:false},beginAtZero:true}}})});
+  const topM=modelAgg.slice(0,10);
+  mkChart('ch-rmodel',{type:'bar',
+    data:{labels:topM.map(x=>x[0]), datasets:[{label:'Jobs', data:topM.map(x=>x[1]),
+      backgroundColor:cv('--s2'), borderRadius:{topLeft:4,topRight:4}, barPercentage:.55, maxBarThickness:64}]},
+    options:baseOpts({plugins:{legend:{display:false}},
+      scales:{x:{grid:{color:'transparent'},ticks:{color:cv('--tick')},border:{color:cv('--border')}},
+        y:{grid:{color:cv('--grid')},ticks:{color:cv('--tick'),precision:0},border:{display:false},beginAtZero:true}}})});
+  const keys=ms.keys;
+  const doneM=groupSum(S.gfData.filter(r=>r.isCompleted), r=>monthKey(r.reportDate), ()=>1);
+  const cntM=groupSum(S.gfData, r=>monthKey(r.reportDate), ()=>1);
+  mkChart('ch-rcomp',{type:'line',
+    data:{labels:keys.map(monthLabel), datasets:[{label:'Completed %',
+      data:keys.map(k=>pct(doneM.get(k)||0, cntM.get(k)||0)),
+      borderColor:cv('--ok'), backgroundColor:cv('--ok'), borderWidth:2, pointRadius:3, pointHoverRadius:5, tension:.3}]},
+    options:baseOpts({plugins:{legend:{display:false}}, interaction:{mode:'index',intersect:false},
+      scales:{x:{grid:{color:'transparent'},ticks:{color:cv('--tick')},border:{color:cv('--border')}},
+        y:{grid:{color:cv('--grid')},ticks:{color:cv('--tick'),callback:v=>v+'%'},border:{display:false},min:0,max:100}}})});
+}
+
 /* ================================================================
    PMC — OVERVIEW
    ================================================================ */
@@ -1770,6 +2123,40 @@ function exportExcel(){
     aoaSheet(wb,'Sales Users',[[S.userLabel,'Quotes','Value (AED)','Approved','Conversion %'],
       ...us.map(a=>[a.key,a.n,a.value,a.approved,pct(a.approved,a.n)])]);
     XLSX.writeFile(wb,`QuotePro_Quotation_Report_${stamp()}.xlsx`);
+  }else if(S.mode==='repair'){
+    const st=rStats(S.gfData);
+    aoaSheet(wb,'KPIs',[
+      ['QuotePro — Repair Work Dashboard KPIs'],['Generated',new Date().toLocaleString()],[],
+      ['KPI','Value'],
+      ['Total Jobs',st.total],['Completed',st.completed],['Completion %',st.completeRate],
+      ['Open / Other',st.open],['Customers',st.customers],['Technicians',st.technicians],
+      ['FSR Received',st.fsrYes],['FSR Rate %',st.fsrRate],
+      ['QRF Received',st.qrfYes],['QRF Rate %',st.qrfRate],
+      ['With Feedback',st.withFeedback],
+    ]);
+    aoaSheet(wb,'Repair Jobs',[
+      ['Serial Number','Title / Customer Name','Job Scope','Model','Task','Job Type','Date','Technician','Contact Person','Contact Number','FSR Received','FSR Number','QRF Received','QRF Number','Remarks','Status','Created By','Created','Item Type','Customer Feedback Date','Customer Feedback','Customer Comments'],
+      ...S.gfData.map(r=>[r.serial,r.customer,r.jobScope,r.model,r.task,r.jobType,isoDate(r.jobDate),
+        r.technician,r.contactPerson,r.contactNumber,r.fsrReceived,r.fsrNumber,r.qrfReceived,r.qrfNumber,
+        r.remarks,r.status,r.createdBy,isoDate(r.created),r.itemType,isoDate(r.feedbackDate),
+        r.customerFeedback,r.customerComments])]);
+    const keys=monthlyKeys(S.gfData);
+    const cM=groupSum(S.gfData,r=>monthKey(r.reportDate),()=>1),
+      dM=groupSum(S.gfData.filter(r=>r.isCompleted),r=>monthKey(r.reportDate),()=>1);
+    aoaSheet(wb,'Monthly',[['Month','Jobs','Completed','Completion %'],
+      ...keys.map(k=>[monthLabel(k),cM.get(k)||0,dM.get(k)||0,pct(dM.get(k)||0,cM.get(k)||0)])]);
+    const techM=new Map();
+    S.gfData.forEach(r=>{
+      const k=r.technician||'(Blank)';
+      if(!techM.has(k)) techM.set(k,{n:0,completed:0});
+      const a=techM.get(k); a.n++; if(r.isCompleted) a.completed++;
+    });
+    aoaSheet(wb,'Technicians',[['#','Technician','Jobs','Completed','Completion %'],
+      ...[...techM.entries()].sort((a,b)=>b[1].n-a[1].n).map(([k,a],i)=>[i+1,k,a.n,a.completed,pct(a.completed,a.n)])]);
+    const cust=aggBy(S.gfData,'customer').sort((a,b)=>b.n-a.n);
+    aoaSheet(wb,'Customers',[['#','Customer','Jobs','Completed','Completion %','Open / Other'],
+      ...cust.map((a,i)=>[i+1,a.key,a.n,a.approved,pct(a.approved,a.n),a.pending])]);
+    XLSX.writeFile(wb,`QuotePro_Repair_Report_${stamp()}.xlsx`);
   }else{
     const st=pStats(S.gfData);
     aoaSheet(wb,'KPIs',[
@@ -1806,6 +2193,14 @@ function exportCSV(powerBI){
       r.contact,r.contactNumber,isoDate(r.sentDate),isoDate(r.approvedDate),isoDate(r.enquiryDate),
       r.daysInterval??'',r.status,isoDate(r.reportDate),r.reportDate?r.reportDate.getFullYear():'',
       r.reportDate?r.reportDate.getMonth()+1:'',r.remarks]);
+  }else if(S.mode==='repair'){
+    head=['SerialNumber','Customer','JobScope','Model','Task','JobType','JobDate','Technician','ContactPerson','ContactNumber','FSRReceived','FSRNumber','QRFReceived','QRFNumber','Remarks','Status','CreatedBy','Created','ItemType','CustomerFeedbackDate','CustomerFeedback','CustomerComments','ReportDate','ReportYear','ReportMonth','ReportQuarter'];
+    rows=S.gfData.map(r=>[r.serial,r.customer,r.jobScope,r.model,r.task,r.jobType,isoDate(r.jobDate),
+      r.technician,r.contactPerson,r.contactNumber,r.fsrReceived,r.fsrNumber,r.qrfReceived,r.qrfNumber,
+      r.remarks,r.status,r.createdBy,isoDate(r.created),r.itemType,isoDate(r.feedbackDate),
+      r.customerFeedback,r.customerComments,isoDate(r.reportDate),
+      r.reportDate?r.reportDate.getFullYear():'',r.reportDate?r.reportDate.getMonth()+1:'',
+      r.reportDate?quarterOf(r.reportDate):'']);
   }else{
     head=['Sr','Department','Customer','CustomerType','ContractNumber','Location','ContractStatus','ApprovalStatus','ApprovedBy','ApprovedDate','ExpiryDate','ContractValueAED','Trucks','Remarks','CreatedBy','CreatedTime','Brand','YearsOffered','ReportDate','ReportYear','ReportMonth'];
     rows=S.gfData.map((r,i)=>[i+1,r.department,r.customer,r.customerType,r.contractNumber,r.location,
@@ -1814,7 +2209,7 @@ function exportCSV(powerBI){
       isoDate(r.reportDate),r.reportDate?r.reportDate.getFullYear():'',r.reportDate?r.reportDate.getMonth()+1:'']);
   }
   const csv=[head,...rows].map(r=>r.map(csvEsc).join(',')).join('\r\n');
-  const base=S.mode==='quotation'?'Quotation':'PMC';
+  const base=S.mode==='quotation'?'Quotation':S.mode==='repair'?'Repair':'PMC';
   dlBlob(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}),
     `QuotePro_${base}_${powerBI?'PowerBI_Fact':'Filtered'}_${stamp()}.csv`);
 }
