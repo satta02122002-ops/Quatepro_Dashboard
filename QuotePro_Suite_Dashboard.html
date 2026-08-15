@@ -1098,6 +1098,16 @@ function ynVal(v){
   if(/^(n|no|false|0)$/i.test(s)) return 'No';
   return s;
 }
+function normFeedback(v){
+  const s=String(v??'').trim();
+  if(!s) return '';
+  if(/^not[\s\-]*happy$/i.test(s) || /^unhappy$/i.test(s)) return 'Not Happy';
+  if(/^happy$/i.test(s)) return 'Happy';
+  return s;
+}
+function feedbackLabel(v){
+  return v==='Happy'?'😊 Happy':v==='Not Happy'?'😞 Not Happy':v||'';
+}
 function parseRepairData(){
   const H=S.rawHeader, R=S.rawRows;
   const col={
@@ -1181,7 +1191,7 @@ function parseRepairData(){
       created,
       itemType:String(get(r,col.itemType)??''),
       feedbackDate:parseDateVal(get(r,col.feedbackDate)),
-      customerFeedback:String(get(r,col.customerFeedback)??''),
+      customerFeedback:normFeedback(get(r,col.customerFeedback)),
       customerComments:String(get(r,col.customerComments)??''),
     };
     rec.isCompleted=/complet/i.test(rec.status);
@@ -1224,6 +1234,10 @@ function filterConfig(){
     {k:'model',label:'Model',opts:()=>uniqVals('model')},
     {k:'fsrReceived',label:'FSR Received',opts:()=>['Yes','No']},
     {k:'qrfReceived',label:'QRF Received',opts:()=>['Yes','No']},
+    {k:'customerFeedback',label:'Customer Feedback',opts:()=>[
+      {v:'Happy',t:'😊 Happy'},
+      {v:'Not Happy',t:'😞 Not Happy'},
+    ]},
     {k:'itemType',label:'Item Type',opts:()=>uniqVals('itemType')},
   ];
   return [
@@ -1299,6 +1313,7 @@ function applyFilters(){
       if(f.model && r.model!==f.model) return false;
       if(f.fsrReceived && r.fsrReceived!==f.fsrReceived) return false;
       if(f.qrfReceived && r.qrfReceived!==f.qrfReceived) return false;
+      if(f.customerFeedback && r.customerFeedback!==f.customerFeedback) return false;
       if(f.itemType && r.itemType!==f.itemType) return false;
     }else{
       if(f.department && r.department!==f.department) return false;
@@ -1325,6 +1340,7 @@ function renderChips(){
     let disp=v;
     if(k==='month') disp=MONTHS[+v];
     if(k==='quarter') disp='Q'+v;
+    if(k==='customerFeedback') disp=feedbackLabel(v);
     if(f.num) disp='AED '+(+v).toLocaleString();
     return `<span class="chip">${esc(f.label)}: ${esc(disp)} <button data-chip="${k}" title="Remove">✕</button></span>`;
   }).join('');
@@ -1515,6 +1531,9 @@ const pillJobStatus=v=>{
 };
 const pillYN=v=>v==='Yes'?`<span class="pill pill-ok">Yes</span>`
   : v==='No'?`<span class="pill pill-bad">No</span>`
+  : v?`<span class="pill pill-mut">${esc(v)}</span>`:'—';
+const pillFeedback=v=>v==='Happy'?`<span class="pill pill-ok">😊 Happy</span>`
+  : v==='Not Happy'?`<span class="pill pill-bad">😞 Not Happy</span>`
   : v?`<span class="pill pill-mut">${esc(v)}</span>`:'—';
 
 /* ================================================================
@@ -1735,9 +1754,12 @@ function rStats(rows){
   const technicians=new Set(rows.map(r=>r.technician).filter(Boolean)).size;
   const fsrYes=rows.filter(r=>r.fsrReceived==='Yes').length;
   const qrfYes=rows.filter(r=>r.qrfReceived==='Yes').length;
-  const withFeedback=rows.filter(r=>r.customerFeedback || r.customerComments || r.feedbackDate).length;
-  return {total, completed, open, customers, technicians, fsrYes, qrfYes, withFeedback,
-    completeRate:pct(completed,total), fsrRate:pct(fsrYes,total), qrfRate:pct(qrfYes,total)};
+  const happy=rows.filter(r=>r.customerFeedback==='Happy').length;
+  const notHappy=rows.filter(r=>r.customerFeedback==='Not Happy').length;
+  const withFeedback=happy+notHappy;
+  return {total, completed, open, customers, technicians, fsrYes, qrfYes, happy, notHappy, withFeedback,
+    completeRate:pct(completed,total), fsrRate:pct(fsrYes,total), qrfRate:pct(qrfYes,total),
+    happyRate:pct(happy,total), notHappyRate:pct(notHappy,total)};
 }
 function rOverview(c){
   const st=rStats(S.gfData);
@@ -1749,10 +1771,12 @@ function rOverview(c){
       {l:'Technicians', v:fmtInt(st.technicians), s:'active in filtered view', cls:'k-acc'},
       {l:'FSR Received', v:fmtInt(st.fsrYes), s:`<b>${st.fsrRate}%</b> of jobs`},
       {l:'QRF Received', v:fmtInt(st.qrfYes), s:`<b>${st.qrfRate}%</b> of jobs`},
+      {l:'😊 Happy', v:fmtInt(st.happy), s:`<b>${st.happyRate}%</b> of filtered jobs`, cls:'k-ok'},
+      {l:'😞 Not Happy', v:fmtInt(st.notHappy), s:`<b>${st.notHappyRate}%</b> of filtered jobs`, cls:'k-bad'},
     ],160)+
     `<div class="charts-grid">`+
       chartCard('ch-rtrend','Jobs Trend','Repair jobs per month by job / created date',8)+
-      chartCard('ch-rstatus','Status Mix','Share of jobs by status',4)+
+      chartCard('ch-rfeedback','Customer Feedback','😊 Happy vs 😞 Not Happy (updates with filters)',4)+
       chartCard('ch-rvol','Monthly Volume','Completed vs open jobs per month',7)+
       chartCard('ch-rjob','Job Type Mix','Jobs by job type',5)+
     `</div>`;
@@ -1764,8 +1788,10 @@ function rOverview(c){
     options:baseOpts({plugins:{legend:{display:false}}, interaction:{mode:'index',intersect:false},
       scales:{x:{grid:{color:'transparent'},ticks:{color:cv('--tick')},border:{color:cv('--border')}},
         y:{grid:{color:cv('--grid')},ticks:{color:cv('--tick'),precision:0},border:{display:false},beginAtZero:true}}})});
-  const stAgg=[...groupSum(S.gfData, r=>r.status||'(Blank)', ()=>1).entries()].sort((a,b)=>b[1]-a[1]);
-  mkChart('ch-rstatus', donutCfg(stAgg.map(x=>x[0]), stAgg.map(x=>x[1]), SERIES().slice(0,stAgg.length)));
+  mkChart('ch-rfeedback', donutCfg(
+    ['😊 Happy','😞 Not Happy'],
+    [st.happy, st.notHappy],
+    [cv('--ok'), cv('--bad')]));
   const keys=monthlyKeys(S.gfData);
   const doneM=groupSum(S.gfData.filter(r=>r.isCompleted), r=>monthKey(r.reportDate), ()=>1);
   const openM=groupSum(S.gfData.filter(r=>!r.isCompleted), r=>monthKey(r.reportDate), ()=>1);
@@ -1808,7 +1834,7 @@ function rJobs(c){
     {k:'created',t:'Created'},
     {k:'itemType',t:'Item Type'},
     {k:'feedbackDate',t:'Customer Feedback Date'},
-    {k:'customerFeedback',t:'Customer Feedback'},
+    {k:'customerFeedback',t:'Customer Feedback',fmt:pillFeedback},
     {k:'customerComments',t:'Customer Comments'},
   ], S.gfData, {what:'jobs'});
 }
@@ -1872,8 +1898,10 @@ function rAnalytics(c){
         <div class="d">${peakI>=0?fmtInt(peakV)+' jobs':''}</div></div>
       <div class="insight"><div class="t">Top Model</div><div class="v">${esc(modelAgg[0]?.[0]||'—')}</div>
         <div class="d">${modelAgg[0]?fmtInt(modelAgg[0][1])+' jobs':''}</div></div>
-      <div class="insight ${st.withFeedback?'i-ok':'i-warn'}"><div class="t">With Feedback</div><div class="v">${fmtInt(st.withFeedback)}</div>
-        <div class="d">${pct(st.withFeedback,st.total)}% of jobs have feedback</div></div>
+      <div class="insight i-ok"><div class="t">😊 Happy</div><div class="v">${fmtInt(st.happy)}</div>
+        <div class="d">${st.happyRate}% of filtered jobs</div></div>
+      <div class="insight i-bad"><div class="t">😞 Not Happy</div><div class="v">${fmtInt(st.notHappy)}</div>
+        <div class="d">${st.notHappyRate}% of filtered jobs</div></div>
     </div>
     <div class="charts-grid">`+
       chartCard('ch-rfsr','FSR / QRF Receipt','Yes vs No for FSR and QRF',6,'short')+
@@ -2132,6 +2160,7 @@ function exportExcel(){
       ['Open / Other',st.open],['Customers',st.customers],['Technicians',st.technicians],
       ['FSR Received',st.fsrYes],['FSR Rate %',st.fsrRate],
       ['QRF Received',st.qrfYes],['QRF Rate %',st.qrfRate],
+      ['😊 Happy',st.happy],['😞 Not Happy',st.notHappy],
       ['With Feedback',st.withFeedback],
     ]);
     aoaSheet(wb,'Repair Jobs',[
