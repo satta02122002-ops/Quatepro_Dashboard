@@ -219,6 +219,25 @@ table.tbl th.num{text-align:right}
 .insight .v{font-size:16px;font-weight:700}
 .insight .d{font-size:12px;color:var(--muted);margin-top:3px}
 .insight.i-ok{border-left-color:var(--ok)} .insight.i-warn{border-left-color:var(--warn)} .insight.i-bad{border-left-color:var(--bad)}
+/* ================= FEEDBACK MOOD (Repair Overview) ================= */
+.fb-mood-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.fb-mood{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px 20px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px;min-width:0}
+.fb-mood.happy{border-color:var(--ok);background:var(--ok-soft)}
+.fb-mood.sad{border-color:var(--bad);background:var(--bad-soft)}
+.fb-mood .emo{font-size:64px;line-height:1;filter:none}
+.fb-mood .cnt{font-size:42px;font-weight:750;letter-spacing:-.03em;line-height:1.1;font-variant-numeric:tabular-nums}
+.fb-mood.happy .cnt{color:var(--ok)}
+.fb-mood.sad .cnt{color:var(--bad)}
+.fb-mood .lbl{font-size:14px;font-weight:700;letter-spacing:.02em}
+.fb-mood.happy .lbl{color:var(--ok)}
+.fb-mood.sad .lbl{color:var(--bad)}
+.fb-mood .sub{font-size:12px;color:var(--muted)}
+@media(max-width:760px){
+  .fb-mood-grid{grid-template-columns:1fr}
+  .fb-mood .emo{font-size:52px}
+  .fb-mood .cnt{font-size:34px}
+}
 /* ================= MODALS ================= */
 .modal-bg{position:fixed;inset:0;background:rgba(2,6,12,.72);z-index:100;display:flex;
   align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)}
@@ -1771,12 +1790,24 @@ function rOverview(c){
       {l:'Technicians', v:fmtInt(st.technicians), s:'active in filtered view', cls:'k-acc'},
       {l:'FSR Received', v:fmtInt(st.fsrYes), s:`<b>${st.fsrRate}%</b> of jobs`},
       {l:'QRF Received', v:fmtInt(st.qrfYes), s:`<b>${st.qrfRate}%</b> of jobs`},
-      {l:'😊 Happy', v:fmtInt(st.happy), s:`<b>${st.happyRate}%</b> of filtered jobs`, cls:'k-ok'},
-      {l:'😞 Not Happy', v:fmtInt(st.notHappy), s:`<b>${st.notHappyRate}%</b> of filtered jobs`, cls:'k-bad'},
     ],160)+
+    `<div class="fb-mood-grid" aria-label="Customer feedback summary">
+      <div class="fb-mood happy">
+        <div class="emo" aria-hidden="true">😊</div>
+        <div class="cnt">${fmtInt(st.happy)}</div>
+        <div class="lbl">Happy</div>
+        <div class="sub"><b>${st.happyRate}%</b> of filtered jobs</div>
+      </div>
+      <div class="fb-mood sad">
+        <div class="emo" aria-hidden="true">😞</div>
+        <div class="cnt">${fmtInt(st.notHappy)}</div>
+        <div class="lbl">Not Happy</div>
+        <div class="sub"><b>${st.notHappyRate}%</b> of filtered jobs</div>
+      </div>
+    </div>`+
     `<div class="charts-grid">`+
       chartCard('ch-rtrend','Jobs Trend','Repair jobs per month by job / created date',8)+
-      chartCard('ch-rfeedback','Customer Feedback','😊 Happy vs 😞 Not Happy (updates with filters)',4)+
+      chartCard('ch-rstatus','Status Mix','Share of jobs by status',4)+
       chartCard('ch-rvol','Monthly Volume','Completed vs open jobs per month',7)+
       chartCard('ch-rjob','Job Type Mix','Jobs by job type',5)+
     `</div>`;
@@ -1788,10 +1819,8 @@ function rOverview(c){
     options:baseOpts({plugins:{legend:{display:false}}, interaction:{mode:'index',intersect:false},
       scales:{x:{grid:{color:'transparent'},ticks:{color:cv('--tick')},border:{color:cv('--border')}},
         y:{grid:{color:cv('--grid')},ticks:{color:cv('--tick'),precision:0},border:{display:false},beginAtZero:true}}})});
-  mkChart('ch-rfeedback', donutCfg(
-    ['😊 Happy','😞 Not Happy'],
-    [st.happy, st.notHappy],
-    [cv('--ok'), cv('--bad')]));
+  const stAgg=[...groupSum(S.gfData, r=>r.status||'(Blank)', ()=>1).entries()].sort((a,b)=>b[1]-a[1]);
+  mkChart('ch-rstatus', donutCfg(stAgg.map(x=>x[0]), stAgg.map(x=>x[1]), SERIES().slice(0,stAgg.length)));
   const keys=monthlyKeys(S.gfData);
   const doneM=groupSum(S.gfData.filter(r=>r.isCompleted), r=>monthKey(r.reportDate), ()=>1);
   const openM=groupSum(S.gfData.filter(r=>!r.isCompleted), r=>monthKey(r.reportDate), ()=>1);
