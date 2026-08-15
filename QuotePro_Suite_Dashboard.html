@@ -1126,7 +1126,7 @@ function normFeedback(v){
   return s;
 }
 function feedbackLabel(v){
-  return v==='Happy'?'😊 Happy':v==='Not Happy'?'😞 Not Happy':v||'';
+  return v==='Happy'?'😄 Happy':v==='Not Happy'?'☹️ Not Happy':v||'';
 }
 function parseRepairData(){
   const H=S.rawHeader, R=S.rawRows;
@@ -1255,8 +1255,8 @@ function filterConfig(){
     {k:'fsrReceived',label:'FSR Received',opts:()=>['Yes','No']},
     {k:'qrfReceived',label:'QRF Received',opts:()=>['Yes','No']},
     {k:'customerFeedback',label:'Customer Feedback',opts:()=>[
-      {v:'Happy',t:'😊 Happy'},
-      {v:'Not Happy',t:'😞 Not Happy'},
+      {v:'Happy',t:'😄 Happy'},
+      {v:'Not Happy',t:'☹️ Not Happy'},
     ]},
     {k:'itemType',label:'Item Type',opts:()=>uniqVals('itemType')},
   ];
@@ -1552,8 +1552,8 @@ const pillJobStatus=v=>{
 const pillYN=v=>v==='Yes'?`<span class="pill pill-ok">Yes</span>`
   : v==='No'?`<span class="pill pill-bad">No</span>`
   : v?`<span class="pill pill-mut">${esc(v)}</span>`:'—';
-const pillFeedback=v=>v==='Happy'?`<span class="pill pill-ok">😊 Happy</span>`
-  : v==='Not Happy'?`<span class="pill pill-bad">😞 Not Happy</span>`
+const pillFeedback=v=>v==='Happy'?`<span class="pill pill-ok">😄 Happy</span>`
+  : v==='Not Happy'?`<span class="pill pill-bad">☹️ Not Happy</span>`
   : v?`<span class="pill pill-mut">${esc(v)}</span>`:'—';
 
 /* ================================================================
@@ -1794,7 +1794,7 @@ function rOverview(c){
     ],160)+
     `<div class="fb-mood-grid" aria-label="Customer feedback summary">
       <div class="fb-mood happy">
-        <div class="emo" aria-hidden="true">😊</div>
+        <div class="emo" aria-hidden="true">😄</div>
         <div class="fb-body">
           <div class="lbl">Happy</div>
           <div class="cnt">${fmtInt(st.happy)}</div>
@@ -1802,7 +1802,7 @@ function rOverview(c){
         </div>
       </div>
       <div class="fb-mood sad">
-        <div class="emo" aria-hidden="true">😞</div>
+        <div class="emo" aria-hidden="true">☹️</div>
         <div class="fb-body">
           <div class="lbl">Not Happy</div>
           <div class="cnt">${fmtInt(st.notHappy)}</div>
@@ -1932,9 +1932,9 @@ function rAnalytics(c){
         <div class="d">${peakI>=0?fmtInt(peakV)+' jobs':''}</div></div>
       <div class="insight"><div class="t">Top Model</div><div class="v">${esc(modelAgg[0]?.[0]||'—')}</div>
         <div class="d">${modelAgg[0]?fmtInt(modelAgg[0][1])+' jobs':''}</div></div>
-      <div class="insight i-ok"><div class="t">😊 Happy</div><div class="v">${fmtInt(st.happy)}</div>
+      <div class="insight i-ok"><div class="t">😄 Happy</div><div class="v">${fmtInt(st.happy)}</div>
         <div class="d">${st.happyRate}% of filtered jobs</div></div>
-      <div class="insight i-bad"><div class="t">😞 Not Happy</div><div class="v">${fmtInt(st.notHappy)}</div>
+      <div class="insight i-bad"><div class="t">☹️ Not Happy</div><div class="v">${fmtInt(st.notHappy)}</div>
         <div class="d">${st.notHappyRate}% of filtered jobs</div></div>
     </div>
     <div class="charts-grid">`+
@@ -2194,7 +2194,7 @@ function exportExcel(){
       ['Open / Other',st.open],['Customers',st.customers],['Technicians',st.technicians],
       ['FSR Received',st.fsrYes],['FSR Rate %',st.fsrRate],
       ['QRF Received',st.qrfYes],['QRF Rate %',st.qrfRate],
-      ['😊 Happy',st.happy],['😞 Not Happy',st.notHappy],
+      ['😄 Happy',st.happy],['☹️ Not Happy',st.notHappy],
       ['With Feedback',st.withFeedback],
     ]);
     aoaSheet(wb,'Repair Jobs',[
