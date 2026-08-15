@@ -1790,14 +1790,6 @@ function rStats(rows){
 function rOverview(c){
   const st=rStats(S.gfData);
   c.innerHTML=
-    kpiHTML([
-      {l:'Total Jobs', v:fmtInt(st.total), s:`<b>${fmtInt(st.customers)}</b> customers`},
-      {l:'Completed', v:fmtInt(st.completed), s:`<b>${st.completeRate}%</b> completion`, cls:'k-ok'},
-      {l:'Open / Other', v:fmtInt(st.open), s:'not marked completed', cls:'k-warn'},
-      {l:'Technicians', v:fmtInt(st.technicians), s:'active in filtered view', cls:'k-acc'},
-      {l:'FSR Received', v:fmtInt(st.fsrYes), s:`<b>${st.fsrRate}%</b> of jobs`},
-      {l:'QRF Received', v:fmtInt(st.qrfYes), s:`<b>${st.qrfRate}%</b> of jobs`},
-    ],160)+
     `<div class="fb-overview" aria-label="Customer feedback overview">
       <div class="fb-overview-title">Customer Feedback Overview</div>
       <div class="fb-overview-row">
@@ -1818,6 +1810,14 @@ function rOverview(c){
         </div>
       </div>
     </div>`+
+    kpiHTML([
+      {l:'Total Jobs', v:fmtInt(st.total), s:`<b>${fmtInt(st.customers)}</b> customers`},
+      {l:'Completed', v:fmtInt(st.completed), s:`<b>${st.completeRate}%</b> completion`, cls:'k-ok'},
+      {l:'Open / Other', v:fmtInt(st.open), s:'not marked completed', cls:'k-warn'},
+      {l:'Technicians', v:fmtInt(st.technicians), s:'active in filtered view', cls:'k-acc'},
+      {l:'FSR Received', v:fmtInt(st.fsrYes), s:`<b>${st.fsrRate}%</b> of jobs`},
+      {l:'QRF Received', v:fmtInt(st.qrfYes), s:`<b>${st.qrfRate}%</b> of jobs`},
+    ],160)+
     `<div class="charts-grid">`+
       chartCard('ch-rtrend','Jobs Trend','Repair jobs per month by job / created date',8)+
       chartCard('ch-rstatus','Status Mix','Share of jobs by status',4)+
