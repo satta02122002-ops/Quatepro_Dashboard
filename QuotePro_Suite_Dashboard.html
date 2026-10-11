@@ -1157,7 +1157,7 @@ function parseRepairData(){
     model:           findCol(H,['model']),
     task:            findCol(H,['task','taskname']),
     jobType:         findCol(H,['jobtype','worktype']),
-    technician:      findCol(H,['technician','techname','tech','assignedto']),
+    technicianCols:  findCols(H,['technician','techname','tech','assignedto']),
     contactPerson:   findCol(H,['contactperson','contactname']),
     contactNumber:   findCol(H,['contactnumber','phonenumber','mobile','phone']),
     fsrReceived:     findCol(H,['fsrreceived','fsrrecd','fsrrecv']),
@@ -1209,7 +1209,6 @@ function parseRepairData(){
       task:String(get(r,col.task)??''),
       jobType:String(get(r,col.jobType)??''),
       jobDate,
-      technician:String(get(r,col.technician)??''),
       contactPerson:String(get(r,col.contactPerson)??''),
       contactNumber:String(get(r,col.contactNumber)??''),
       fsrReceived:ynVal(get(r,col.fsrReceived)),
@@ -1227,6 +1226,15 @@ function parseRepairData(){
     };
     rec.isCompleted=/complet/i.test(rec.status);
     rec.reportDate=jobDate || created || rec.feedbackDate || null;
+    const techSeen=new Set(), techArr=[];
+    (col.technicianCols||[]).forEach(ci=>{
+      const v=get(r,ci); if(v==null) return;
+      const s=String(v).trim(); if(!s) return;
+      const key=s.toLowerCase(); if(techSeen.has(key)) return;
+      techSeen.add(key); techArr.push(s);
+    });
+    rec.technicians=techArr;
+    rec.technician=techArr.join(', ');
     out.push(rec);
   });
   return out;
@@ -1237,7 +1245,8 @@ function parseRepairData(){
    ================================================================ */
 function uniqVals(field){
   const s=new Set();
-  S.allData.forEach(r=>{ const v=r[field]; if(v!=null && String(v).trim()!=='') s.add(String(v)); });
+  const add=x=>{ if(x!=null && String(x).trim()!=='') s.add(String(x)); };
+  S.allData.forEach(r=>{ const v=r[field]; if(Array.isArray(v)) v.forEach(add); else add(v); });
   return [...s].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
 }
 function filterConfig(){
@@ -1266,7 +1275,7 @@ function filterConfig(){
     {k:'customer',label:'Customer',opts:()=>uniqVals('customer')},
     {k:'jobType',label:'Job Type',opts:()=>uniqVals('jobType')},
     {k:'status',label:'Status',opts:()=>uniqVals('status')},
-    {k:'technician',label:'Technician',opts:()=>uniqVals('technician')},
+    {k:'technician',label:'Technician',opts:()=>uniqVals('technicians')},
     {k:'model',label:'Model',opts:()=>uniqVals('model')},
     {k:'fsrReceived',label:'FSR Received',opts:()=>['Yes','No']},
     {k:'qrfReceived',label:'QRF Received',opts:()=>['Yes','No']},
@@ -1346,7 +1355,7 @@ function applyFilters(){
       if(f.customer && r.customer!==f.customer) return false;
       if(f.jobType && r.jobType!==f.jobType) return false;
       if(f.status && r.status!==f.status) return false;
-      if(f.technician && r.technician!==f.technician) return false;
+      if(f.technician && !(r.technicians||[]).includes(f.technician)) return false;
       if(f.model && r.model!==f.model) return false;
       if(f.fsrReceived && r.fsrReceived!==f.fsrReceived) return false;
       if(f.qrfReceived && r.qrfReceived!==f.qrfReceived) return false;
@@ -1788,7 +1797,8 @@ function rStats(rows){
   const completed=rows.filter(r=>r.isCompleted).length;
   const open=total-completed;
   const customers=new Set(rows.map(r=>r.customer).filter(Boolean)).size;
-  const technicians=new Set(rows.map(r=>r.technician).filter(Boolean)).size;
+  const technicianSet=new Set(); rows.forEach(r=>(r.technicians||[]).forEach(t=>{ if(t) technicianSet.add(t); }));
+  const technicians=technicianSet.size;
   const fsrYes=rows.filter(r=>r.fsrReceived==='Yes').length;
   const qrfYes=rows.filter(r=>r.qrfReceived==='Yes').length;
   const happy=rows.filter(r=>r.customerFeedback==='Happy').length;
@@ -1898,11 +1908,13 @@ function rJobs(c){
 function rTechnicians(c){
   const m=new Map();
   S.gfData.forEach(r=>{
-    const k=r.technician||'(Blank)';
-    if(!m.has(k)) m.set(k,{key:k,n:0,completed:0,fsr:0,qrf:0,customers:new Set()});
-    const a=m.get(k); a.n++; if(r.isCompleted) a.completed++;
-    if(r.fsrReceived==='Yes') a.fsr++; if(r.qrfReceived==='Yes') a.qrf++;
-    if(r.customer) a.customers.add(r.customer);
+    const keys=(r.technicians&&r.technicians.length)?r.technicians:['(Blank)'];
+    keys.forEach(k=>{
+      if(!m.has(k)) m.set(k,{key:k,n:0,completed:0,fsr:0,qrf:0,customers:new Set()});
+      const a=m.get(k); a.n++; if(r.isCompleted) a.completed++;
+      if(r.fsrReceived==='Yes') a.fsr++; if(r.qrfReceived==='Yes') a.qrf++;
+      if(r.customer) a.customers.add(r.customer);
+    });
   });
   const rows=[...m.values()].sort((a,b)=>b.n-a.n).map((a,i)=>({
     rank:i+1, technician:a.key, n:a.n, completed:a.completed,
@@ -1943,7 +1955,12 @@ function rAnalytics(c){
   const st=rStats(S.gfData);
   const ms=monthlySeries(S.gfData, ()=>1);
   let peakI=-1,peakV=-1; ms.values.forEach((v,i)=>{ if(v>peakV){peakV=v;peakI=i;} });
-  const techAgg=[...groupSum(S.gfData, r=>r.technician||'(Blank)', ()=>1).entries()].sort((a,b)=>b[1]-a[1]);
+  const techAggMap=new Map();
+  S.gfData.forEach(r=>{
+    const keys=(r.technicians&&r.technicians.length)?r.technicians:['(Blank)'];
+    keys.forEach(k=>techAggMap.set(k,(techAggMap.get(k)||0)+1));
+  });
+  const techAgg=[...techAggMap.entries()].sort((a,b)=>b[1]-a[1]);
   const modelAgg=[...groupSum(S.gfData, r=>r.model||'(Blank)', ()=>1).entries()].sort((a,b)=>b[1]-a[1]);
   c.innerHTML=
     `<div class="insight-grid">
@@ -2231,9 +2248,11 @@ function exportExcel(){
       ...keys.map(k=>[monthLabel(k),cM.get(k)||0,dM.get(k)||0,pct(dM.get(k)||0,cM.get(k)||0)])]);
     const techM=new Map();
     S.gfData.forEach(r=>{
-      const k=r.technician||'(Blank)';
-      if(!techM.has(k)) techM.set(k,{n:0,completed:0});
-      const a=techM.get(k); a.n++; if(r.isCompleted) a.completed++;
+      const keys=(r.technicians&&r.technicians.length)?r.technicians:['(Blank)'];
+      keys.forEach(k=>{
+        if(!techM.has(k)) techM.set(k,{n:0,completed:0});
+        const a=techM.get(k); a.n++; if(r.isCompleted) a.completed++;
+      });
     });
     aoaSheet(wb,'Technicians',[['#','Technician','Jobs','Completed','Completion %'],
       ...[...techM.entries()].sort((a,b)=>b[1].n-a[1].n).map(([k,a],i)=>[i+1,k,a.n,a.completed,pct(a.completed,a.n)])]);
