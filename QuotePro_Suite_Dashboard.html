@@ -1237,7 +1237,42 @@ function parseRepairData(){
     rec.technician=techArr.join(', ');
     out.push(rec);
   });
-  return out;
+  return consolidateRepairJobs(out);
+}
+/* Multiple rows that describe the same job (one row per technician in the
+   source file) are merged into a single record. The technicians arrays are
+   combined so one job keeps one record while showing every tech who worked
+   on it. */
+function consolidateRepairJobs(rows){
+  const normKey=v=>String(v??'').trim().toLowerCase();
+  const jobKey=r=>{
+    const fsr=normKey(r.fsrNumber), qrf=normKey(r.qrfNumber), ser=normKey(r.serial);
+    if(fsr) return 'fsr:'+fsr;
+    if(qrf) return 'qrf:'+qrf;
+    const d=r.jobDate?r.jobDate.getTime():'';
+    const parts=[ser,normKey(r.customer),normKey(r.model),normKey(r.task),normKey(r.jobScope),d];
+    if(parts.slice(0,4).every(p=>!p)) return null;    // not enough signal → keep row distinct
+    return 'cmp:'+parts.join('|');
+  };
+  const map=new Map(), order=[];
+  rows.forEach(r=>{
+    const k=jobKey(r);
+    if(k==null){ order.push(r); return; }
+    const existing=map.get(k);
+    if(!existing){ map.set(k,r); order.push(r); return; }
+    const seen=new Set(existing.technicians.map(t=>t.toLowerCase()));
+    r.technicians.forEach(t=>{ const lk=t.toLowerCase(); if(!seen.has(lk)){ seen.add(lk); existing.technicians.push(t); } });
+    existing.technician=existing.technicians.join(', ');
+    if(existing.fsrReceived!=='Yes' && r.fsrReceived==='Yes') existing.fsrReceived='Yes';
+    if(existing.qrfReceived!=='Yes' && r.qrfReceived==='Yes') existing.qrfReceived='Yes';
+    if(!existing.isCompleted && r.isCompleted){ existing.isCompleted=true; existing.status=r.status||existing.status; }
+    if(!existing.customerFeedback && r.customerFeedback) existing.customerFeedback=r.customerFeedback;
+    if(!existing.feedbackDate && r.feedbackDate) existing.feedbackDate=r.feedbackDate;
+    ['customer','model','task','jobScope','jobType','contactPerson','contactNumber','remarks','customerComments','itemType','createdBy','fsrNumber','qrfNumber','serial']
+      .forEach(f=>{ if(!existing[f] && r[f]) existing[f]=r[f]; });
+    if(!existing.reportDate && r.reportDate) existing.reportDate=r.reportDate;
+  });
+  return order;
 }
 
 /* ================================================================
