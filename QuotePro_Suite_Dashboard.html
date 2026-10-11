@@ -1020,6 +1020,7 @@ function parseQuotationData(){
     value:        findCol(H,['totalquotationvalue','quotationvalue','totalvalue','value','amount']),
     contact:      findCol(H,['associatedcontact','salesperson','salesengineer','user']),
     contactNumber:findCol(H,['contactnumber','phonenumber','mobile','phone']),
+    quotationOwner:findCol(H,['quotationowner','quoteowner','owner']),
     daysInterval: findCol(H,['daysinterval','responsedays']),
     remarks:      findCol(H,['remarks','remark','comments','notes']),
   };
@@ -1043,6 +1044,7 @@ function parseQuotationData(){
       value:parseNumVal(get(r,col.value)),
       contact:String(get(r,col.contact)??''),
       contactNumber:String(get(r,col.contactNumber)??''),
+      quotationOwner:String(get(r,col.quotationOwner)??''),
       sentDate:parseDateVal(get(r,col.sentDate)),
       approvedDate,
       enquiryDate:parseDateVal(get(r,col.enquiryDate)),
@@ -1239,19 +1241,24 @@ function uniqVals(field){
   return [...s].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
 }
 function filterConfig(){
-  if(S.mode==='quotation') return [
-    {k:'year',label:'Year',opts:()=>uniqYears()},
-    {k:'quarter',label:'Quarter',opts:()=>QUARTERS},
-    {k:'month',label:'Month',opts:()=>MONTHS.map((m,i)=>({v:String(i),t:m}))},
-    {k:'customer',label:'Customer',opts:()=>uniqVals('customer')},
-    {k:'emirate',label:'Emirate',opts:()=>uniqVals('emirate')},
-    {k:'contact',label:S.userLabel,opts:()=>uniqVals('contact')},
-    {k:'brand',label:'Brand',opts:()=>uniqVals('brand')},
-    {k:'quotationType',label:'Quotation Type',opts:()=>uniqVals('quotationType')},
-    {k:'status',label:'Status',opts:()=>['Approved','Pending']},
-    {k:'minVal',label:'Min Value',num:true},
-    {k:'maxVal',label:'Max Value',num:true},
-  ];
+  if(S.mode==='quotation'){
+    const hasOwner=S.allData.some(r=>r.quotationOwner && r.quotationOwner.trim()!=='');
+    const cfg=[
+      {k:'year',label:'Year',opts:()=>uniqYears()},
+      {k:'quarter',label:'Quarter',opts:()=>QUARTERS},
+      {k:'month',label:'Month',opts:()=>MONTHS.map((m,i)=>({v:String(i),t:m}))},
+      {k:'customer',label:'Customer',opts:()=>uniqVals('customer')},
+      {k:'emirate',label:'Emirate',opts:()=>uniqVals('emirate')},
+      {k:'contact',label:S.userLabel,opts:()=>uniqVals('contact')},
+      {k:'brand',label:'Brand',opts:()=>uniqVals('brand')},
+      {k:'quotationType',label:'Quotation Type',opts:()=>uniqVals('quotationType')},
+      {k:'status',label:'Status',opts:()=>['Approved','Pending']},
+      {k:'minVal',label:'Min Value',num:true},
+      {k:'maxVal',label:'Max Value',num:true},
+    ];
+    if(hasOwner) cfg.splice(6,0,{k:'quotationOwner',label:'Quotation Owner',opts:()=>uniqVals('quotationOwner')});
+    return cfg;
+  }
   if(S.mode==='repair') return [
     {k:'year',label:'Year',opts:()=>uniqYears()},
     {k:'quarter',label:'Quarter',opts:()=>QUARTERS},
@@ -1329,6 +1336,7 @@ function applyFilters(){
       if(f.customer && r.customer!==f.customer) return false;
       if(f.emirate && r.emirate!==f.emirate) return false;
       if(f.contact && r.contact!==f.contact) return false;
+      if(f.quotationOwner && r.quotationOwner!==f.quotationOwner) return false;
       if(f.brand && r.brand!==f.brand) return false;
       if(f.quotationType && r.quotationType!==f.quotationType) return false;
       if(f.status && r.status!==f.status) return false;
